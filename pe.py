@@ -50,21 +50,6 @@ class Buffer(object):
         # the end of text content in our buffer
         self.__content_end = 0
 
-        # initialize the buffer we use to hold text data in, a unicode array
-        self.__buf = None
-        if initial_content is None:
-            self.__buf = array.array("u", (u" " * 10))
-        else:
-            # make sure our initial content is unicode
-            if not isinstance(initial_content, unicode):
-                raise ValueError("initial_content must be a unicode object")
-
-            # insert the initial content and set the content end pointer for it
-            self.__buf = array.array("u", initial_content)
-            self.__content_end = len(initial_content)
-
-        assert self.__buf is not None
-
         # where the gap should be moved to when it needs to be moved
         self.__cursor = 0
 
@@ -73,6 +58,21 @@ class Buffer(object):
 
         # the minimum amount of space to create when resizing the gap
         self.__min_gap_len = 10
+
+        # initialize the buffer we use to hold text data in, a unicode array
+        buf_content = None
+        if initial_content is None:
+            buf_content = u" " * 10
+        else:
+            # make sure our initial content is unicode
+            if not isinstance(initial_content, unicode):
+                raise ValueError("initial_content must be a unicode object")
+
+            # insert the initial content and set the content end pointer for it
+            buf_content = initial_content
+            self.__content_end = len(initial_content)
+
+        self.__buf = array.array("u", buf_content)
 
     @property
     def cursor(self):
@@ -114,24 +114,8 @@ class Buffer(object):
         if not isinstance(text, unicode):
             raise ValueError("text must be a unicode object")
 
-        # ensure the gap is large enough for the inserted text
-        if self.__gap_len < len(text):
-
-            # calculate new gap length (the text plus the min gap size)
-            new_gap_len = len(text) + self.__min_gap_len
-
-            # make room for the new content
-            self.__resize_buf(self.__left_len + new_gap_len + self.__right_len)
-
-            # shift the right content down to make room for the new gap
-            for i in reversed(xrange(self.__gap_end, self.__content_end)):
-                self.__buf[i + new_gap_len] = self.__buf[i]
-
-            # move the gap pointer forward
-            self.__gap_end += new_gap_len
-
-            # move the content end pointer forward
-            self.__content_end += new_gap_len
+        # ensure the gap is large enough for the text being inserted
+        self.__resize_gap(len(text))
 
         # move the gap to the cursor
         self.__move_gap()
@@ -263,7 +247,7 @@ class Buffer(object):
 
         for row in rows:
             for c in row:
-                s.append(c if c is not None else " ")
+                s.append(c if c is not None else u" ")
             s.append(u'\n')
 
         return u''.join(s)
@@ -283,11 +267,29 @@ class Buffer(object):
         """Get the length of the text to the right of the gap's end."""
         return self.__content_end - self.__gap_end
 
+    def __resize_gap(self, target_size):
+        """Ensure that the gap is at least as large as some target."""
+
+        if self.__gap_len < target_size:
+
+            # calculate size increase of the gap
+            gap_delta = target_size + self.__min_gap_len - self.__gap_len
+
+            # make room for the current content and the new gap
+            self.__resize_buf(len(self) + gap_delta)
+
+            # shift the right content down to make room for the new gap
+            for i in reversed(xrange(self.__gap_end, self.__content_end)):
+                self.__buf[i + gap_delta] = self.__buf[i]
+
+            # move the gap and content end pointers forward
+            self.__gap_end += gap_delta
+            self.__content_end += gap_delta
+
+        return self
+
     def __resize_buf(self, target_size):
-        """
-        Resize the array to a new target size by doubling it until it's long
-        enough.
-        """
+        """Ensure that the buffer is at least as large as some target."""
 
         # double the size while the buffer is shorter than the target length
         while len(self.__buf) < target_size:
@@ -343,20 +345,26 @@ if __name__ == "__main__":
     b = Buffer()
     print b.debug_view()
 
-    b.insert(u"sheepsheepsheep")
+    b.insert(u"Hello!")
     print b.debug_view()
 
-    b.insert(u"Hello, world!")
+    b.cursor -= 1
+    print b.debug_view()
+
+    b.insert(u", world")
     print b.debug_view()
 
     b.cursor -= 5
     print b.debug_view()
 
-    b.insert(u"!!!")
+    b.delete(5)
     print b.debug_view()
 
-    b.cursor -= 3
+    b.insert(u"pants")
     print b.debug_view()
 
-    b.delete(3)
+    b.cursor = 0
+    print b.debug_view()
+
+    b.insert(u"Whoa! ")
     print b.debug_view()
