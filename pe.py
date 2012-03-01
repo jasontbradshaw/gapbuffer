@@ -139,19 +139,28 @@ class Buffer(object):
             i = index if index < self.__gap_start else index + self.__gap_len
             self.__buf[i] = value
 
+    def insert(self, text, position=None):
         """
-        Insert text before the cursor's current position. Moves the cursor to
-        the last character of the inserted text.
+        Insert text before the cursor's current position.
+
+        If 'position' is specified, moves the cursor to the given position
+        before inserting the text.
+
+        Moves the cursor to the last character of the inserted text.
 
         'text' must be return unicode characters during iteration, or a
         TypeError will be raised.
         """
 
-        # ensure the gap is large enough for the text being inserted
-        self.__resize_gap(len(text))
+        # first move the cursor to the position if a position was specified
+        if position is not None:
+            self.cursor = position
 
         # move the gap to the cursor
         self.__move_gap()
+
+        # ensure the gap is large enough for the text being inserted
+        self.__resize_gap(len(text))
 
         # insert text at left gap edge while moving the gap start forward
         for c in text:
@@ -164,14 +173,20 @@ class Buffer(object):
 
         return self
 
-    def delete(self, length):
+    def delete(self, length, position=None):
         """
         Remove text starting with the character at the cursor's current position
         and ending after 'length' characters have been removed.
 
+        If 'position' is specified, moves the cursor to the given position
+        before deleting the text.
+
         If 'length' is larger than the size of the buffer's remaining content,
         the text from the cursor to the end of the buffer is removed.
         """
+
+        if position is not None:
+            self.cursor = position
 
         if length < 0:
             raise ValueError("length must be greater than or equal to 0")
@@ -181,8 +196,9 @@ class Buffer(object):
             # move the gap to the cursor
             self.__move_gap()
 
-            # increase the size of the gap to consume the deleted characters
-            self.__gap_end += length
+            # increase the size of the gap to consume the deleted characters,
+            # but only up to the size of the internal buffer.
+            self.__gap_end += min(length, len(self.__buf))
 
         return self
 
