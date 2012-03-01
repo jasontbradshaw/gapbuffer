@@ -3,7 +3,9 @@ import array
 
 class Buffer(object):
     """
-    Represents unicode text using a gap buffer.
+    Represents unicode text using a gap buffer. Can be initialized with any
+    iterable item, as long as that item yields unicode characters during
+    iteration.
     """
 
     def __init__(self, initial_content=None):
@@ -14,9 +16,6 @@ class Buffer(object):
         # points to first taken space at beginning of right text
         self.__gap_end = 0
 
-        # the end of text content in our buffer
-        self.__content_end = 0
-
         # where the gap should be moved to when it needs to be moved
         self.__cursor = 0
 
@@ -26,20 +25,91 @@ class Buffer(object):
         # the minimum amount of space to create when resizing the gap
         self.__min_gap_len = 10
 
+        # the end of content in the buffer
+        self.__content_end = 0
+
+        # NOTE: we set the content end individually later so we can allow
+        # initial_content objects that have no __len__ method.
+
         # initialize the buffer we use to hold text data in, a unicode array
-        buf_content = None
         if initial_content is None:
-            buf_content = u" " * 10
+            # insert placeholder content if no initial content was specified
+            self.__buf = array.array("u", u" " * 10)
+            self.__content_end = 0
         else:
-            # make sure our initial content is unicode
-            if not isinstance(initial_content, unicode):
-                raise ValueError("initial_content must be a unicode object")
-
             # insert the initial content and set the content end pointer for it
-            buf_content = initial_content
-            self.__content_end = len(initial_content)
+            self.__buf = array.array("u", initial_content)
+            self.__content_end = len(self.__buf)
 
-        self.__buf = array.array("u", buf_content)
+    @property
+    def __gap_len(self):
+        """Get the length of the current gap."""
+        return self.__gap_end - self.__gap_start
+
+    @property
+    def __left_len(self):
+        """Get the length of the text to the left of the gap's start."""
+        return self.__gap_start
+
+    @property
+    def __right_len(self):
+        """Get the length of the text to the right of the gap's end."""
+        return self.__content_end - self.__gap_end
+
+    #
+    # NOTE: together, __len__ and __getitem__ make for iteration!
+    #
+
+    def __len__(self):
+        """Get the length of the buffer's text."""
+        return self.__left_len + self.__right_len
+
+    def __getitem__(self, index):
+        """Get the character or slice at some index."""
+
+        # get a slice rather than an index if necessary
+        if isinstance(index, slice):
+            # unpack 'indices()' into xrange, then pass generator to new Buffer
+            return u''.join(self[i] for i in xrange(*index.indices(len(self))))
+        else:
+            # constrain index bounds
+            if index >= len(self):
+                raise IndexError(self.__class__.__name__ + " index out of range")
+
+            # if before the gap, access buffer directly, else account for gap
+            i = index if index < self.__gap_start else index + self.__gap_len
+
+            # access the buffer
+            return self.__buf[i]
+
+    def __setitem__(self, index, value):
+        """Set the character or slice at some index."""
+
+        # set a slice rather than an index if necessary
+        if isinstance(index, slice):
+            # if we can get the length of the value, attempt a direct replace
+            slice_len = abs(index.stop - index.start)
+            if hasattr(value, "__len__") and len(value) == slice_len:
+                # do a direct replacement
+                for i in xrange(*index.indices(len(self))):
+                    self[i] = value[i]
+            else:
+                # store the cursor position
+                old_cursor = self.cursor
+
+                # delete old slice and insert the new one
+                self.cursor = index.start
+                self.delete(index.stop - index.start)
+                self.insert(value)
+
+                # restore the cursor position while accounting for size change
+                self.cursor = min(old_cursor, len(self) - 1)
+        else:
+            if index >= len(self):
+                raise IndexError(self.__class__.__name__ + " index out of range")
+
+            i = index if index < self.__gap_start else index + self.__gap_len
+            self.__buf[i] = value
 
     @property
     def cursor(self):
@@ -60,11 +130,11 @@ class Buffer(object):
         # move the cursor
         self.__cursor = position
 
-        # constrain the cursor to the buffer's boundaries
+        # constrain the cursor to the buffer's virtual boundaries
         if self.__cursor < 0:
             self.__cursor = 0
-        elif self.__cursor > len(self.__buf) - self.__gap_len:
-            self.__cursor = len(self__buf) - self.__gap_len
+        elif self.__cursor > len(self):
+            self.__cursor = len(self)
 
         # mark the cursor as 'dirty' if it has moved
         self.__cursor_dirty = self.__cursor != old_cursor
@@ -118,51 +188,7 @@ class Buffer(object):
             # increase the size of the gap to consume the deleted characters
             self.__gap_end += length
 
-            # constrain the gap size to the length of the content
-            if self.__gap_end > self.__content_end:
-                self.__gap_end = self.__content_end
-
         return self
-
-    def find(self, pattern, start=0, end=None):
-        """
-        Search for the given string or regular expression in the buffer.
-
-        Returns an iterator that yields Range objects for all the matches in the
-        buffer.
-
-        'start' is the position to start looking for the pattern (default 0).
-        'end' is the position after which to stop looking for the pattern
-        (default None, i.e. the end of the buffer).
-
-        Once the buffer is changed, the iterator will no longer be valid, but
-        will still yield its original match locations. Make sure to do another
-        'find()' operation if the buffer is changed!
-        """
-
-    def view(self, start=0, end=None):
-        """
-        Get the unicode string for the characters between start and end. Gets
-        the entire buffer by default.
-
-        'start' and 'end' are constrained to the beginning and end of the
-        content of the buffer.
-
-        If 'start' is greater than 'end', a ValueError will be raised.
-        """
-
-        # constrain the start and end values
-        start = 0 if start < 0 else start
-        if end is None or end > self.__content_end:
-            end = self.__content_end
-
-        # make sure we've got valid start/end values
-        if start > end:
-            raise ValueError("start must be less than or equal to end")
-
-        # return the text with the gap excised
-        return (self.__buf[start:self.__gap_start] +
-                self.__buf[self.__gap_end:end]).tounicode()
 
     def debug_view(self):
         """
@@ -218,21 +244,6 @@ class Buffer(object):
             s.append(u'\n')
 
         return u''.join(s)
-
-    @property
-    def __gap_len(self):
-        """Get the length of the current gap."""
-        return self.__gap_end - self.__gap_start
-
-    @property
-    def __left_len(self):
-        """Get the length of the text to the left of the gap's start."""
-        return self.__gap_start
-
-    @property
-    def __right_len(self):
-        """Get the length of the text to the right of the gap's end."""
-        return self.__content_end - self.__gap_end
 
     def __resize_gap(self, target_size):
         """Ensure that the gap is at least as large as some target."""
@@ -294,19 +305,15 @@ class Buffer(object):
 
         return self
 
-    def __len__(self):
-        """Get the length of the buffer's text."""
-        return self.__left_len + self.__right_len
-
     def __unicode__(self):
         """Get the buffer's entire text."""
-        return self.view()
+        return self[:]
 
     def __str__(self):
         return unicode(self)
 
     def __repr__(self):
-        return unicode(self.__class__.__name__ + "(" + repr(self.view() + ")"))
+        return unicode(self.__class__.__name__ + "(" + repr(self[:]) + ")")
 
 if __name__ == "__main__":
     b = Buffer()
