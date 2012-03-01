@@ -131,7 +131,7 @@ class Buffer(object):
                 self.insert(value)
 
                 # restore the cursor position while accounting for size change
-                self.cursor = min(old_cursor, len(self) - 1)
+                self.cursor = min(old_cursor, len(self))
         else:
             if index >= len(self):
                 raise IndexError(self.__class__.__name__ + " index out of range")
