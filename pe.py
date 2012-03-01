@@ -1,38 +1,6 @@
 #!/usr/bin/env python
 import array
 
-class Range(object):
-    """
-    Represents a numeric range. Use 'len()' to get its size.
-    """
-
-    def __init__(self, start, stop):
-        self.__start = start
-        self.__stop = stop
-        self.__size = stop - start
-
-    @property
-    def start(self):
-        """
-        Get the position of the range's start, the first valid character in the
-        range.
-        """
-
-        return self.__start
-
-    @property
-    def stop(self):
-        """
-        Get the position of the range's end, the first character after the final
-        character in the range (i.e. the first character not in the range).
-        """
-
-        return self.__stop
-
-    def __len__(self):
-        """Get the distance between the range's start and end."""
-        return self.__size
-
 class Buffer(object):
     """
     Represents unicode text using a gap buffer.
