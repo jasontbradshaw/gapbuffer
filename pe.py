@@ -42,6 +42,34 @@ class Buffer(object):
             self.__content_end = len(self.__buf)
 
     @property
+    def cursor(self):
+        """Get the current position of the cursor."""
+        return self.__cursor
+
+    @cursor.setter
+    def cursor(self, position):
+        """Move the cursor within the buffer."""
+
+        # NOTE: does not move the gap! when moved, the cursor position is marked
+        # as 'dirty' so that when text changes happen, the gap can be moved
+        # accordingly elsewhere.
+
+        # store the former cursor position
+        old_cursor = self.__cursor
+
+        # move the cursor
+        self.__cursor = position
+
+        # constrain the cursor to the buffer's virtual boundaries
+        if self.__cursor < 0:
+            self.__cursor = 0
+        elif self.__cursor > len(self):
+            self.__cursor = len(self)
+
+        # mark the cursor as 'dirty' if it has moved
+        self.__cursor_dirty = self.__cursor != old_cursor
+
+    @property
     def __gap_len(self):
         """Get the length of the current gap."""
         return self.__gap_end - self.__gap_start
@@ -111,35 +139,6 @@ class Buffer(object):
             i = index if index < self.__gap_start else index + self.__gap_len
             self.__buf[i] = value
 
-    @property
-    def cursor(self):
-        """Get the current position of the cursor."""
-        return self.__cursor
-
-    @cursor.setter
-    def cursor(self, position):
-        """Move the cursor within the buffer."""
-
-        # NOTE: does not move the gap! when moved, the cursor position is marked
-        # as 'dirty' so that when text changes happen, the gap can be moved
-        # accordingly elsewhere.
-
-        # store the former cursor position
-        old_cursor = self.__cursor
-
-        # move the cursor
-        self.__cursor = position
-
-        # constrain the cursor to the buffer's virtual boundaries
-        if self.__cursor < 0:
-            self.__cursor = 0
-        elif self.__cursor > len(self):
-            self.__cursor = len(self)
-
-        # mark the cursor as 'dirty' if it has moved
-        self.__cursor_dirty = self.__cursor != old_cursor
-
-    def insert(self, text):
         """
         Insert text before the cursor's current position. Moves the cursor to
         the last character of the inserted text.
