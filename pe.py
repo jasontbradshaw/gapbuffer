@@ -144,12 +144,9 @@ class Buffer(object):
         Insert text before the cursor's current position. Moves the cursor to
         the last character of the inserted text.
 
-        'text' must be a unicode string.
+        'text' must be return unicode characters during iteration, or a
+        TypeError will be raised.
         """
-
-        # we only allow unicode values in, so we can't screw up the data types!
-        if not isinstance(text, unicode):
-            raise ValueError("text must be a unicode object")
 
         # ensure the gap is large enough for the text being inserted
         self.__resize_gap(len(text))
