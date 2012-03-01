@@ -232,7 +232,7 @@ class Buffer(object):
                     break
 
         # build the final string
-        s = [u"'", str(self), u"', ", str(len(self)), u"\n",
+        s = [u"'", unicode(self), u"', ", unicode(len(self)), u"\n",
                 self.__buf.tounicode(), u"\n"]
 
         for row in rows:
