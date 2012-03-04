@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import array
+import re
 
 class Buffer(object):
     """
@@ -41,7 +42,8 @@ class Buffer(object):
     @property
     def cursor(self):
         """Get the current position of the cursor."""
-        return self.__cursor
+        # account for the cursor having it's position deleted
+        return min(self.__cursor, len(self))
 
     @cursor.setter
     def cursor(self, position):
@@ -111,23 +113,35 @@ class Buffer(object):
 
         # set a slice rather than an index if necessary
         if isinstance(index, slice):
-            # if we can get the length of the value, attempt a direct replace
-            slice_len = abs(index.stop - index.start)
-            if hasattr(value, "__len__") and len(value) == slice_len:
+            # get the values we'll need
+            start, stop, step = (index.start, index.stop, index.step)
+
+            # set default values
+            start = 0 if start is None else start
+            stop = len(self) if stop is None else stop
+            step = 1 if step is None else step
+
+            print start, stop, step
+
+            # if we can get the length of the value and get its items directly,
+            # and the value is the same size as what it's replacing, do a direct
+            # replace.
+            slice_len = stop - start
+            if (hasattr(value, "__len__") and hasattr(value, "__getitem__")
+                    and len(value) == slice_len):
                 # do a direct replacement
-                for i in xrange(*index.indices(len(self))):
-                    self[i] = value[i]
+                for vi, si in enumerate(xrange(start, stop, step)):
+                    self[si] = value[vi]
             else:
                 # store the cursor position
                 old_cursor = self.cursor
 
                 # delete old slice and insert the new one
-                self.cursor = index.start
-                self.delete(index.stop - index.start)
-                self.insert(value)
+                self.delete(stop - start, start)
+                self.insert(value, start)
 
                 # restore the cursor position while accounting for size change
-                self.cursor = min(old_cursor, len(self))
+                self.cursor = old_cursor
         else:
             if index >= len(self):
                 raise IndexError(self.__class__.__name__ + " index out of range")
