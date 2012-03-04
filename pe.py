@@ -19,9 +19,6 @@ class Buffer(object):
         # where the gap should be moved to when it needs to be moved
         self.__cursor = 0
 
-        # whether the cursor has been moved without the gap being moved
-        self.__cursor_dirty = False
-
         # the minimum amount of space to create when resizing the gap
         self.__min_gap_len = 10
 
@@ -54,9 +51,6 @@ class Buffer(object):
         # as 'dirty' so that when text changes happen, the gap can be moved
         # accordingly elsewhere.
 
-        # store the former cursor position
-        old_cursor = self.__cursor
-
         # move the cursor
         self.__cursor = position
 
@@ -66,8 +60,10 @@ class Buffer(object):
         elif self.__cursor > len(self):
             self.__cursor = len(self)
 
-        # mark the cursor as 'dirty' if it has moved
-        self.__cursor_dirty = self.__cursor != old_cursor
+    @property
+    def __cursor_dirty(self):
+        """Return whether the cursor matches the gap start."""
+        return self.__cursor != self.__gap_start
 
     @property
     def __gap_len(self):
@@ -167,9 +163,8 @@ class Buffer(object):
             self.__buf[self.__gap_start] = c
             self.__gap_start += 1
 
-        # move the cursor to match the new gap start and mark it as 'clean'
+        # move the cursor to match the new gap start
         self.__cursor = self.__gap_start
-        self.__cursor_dirty = False
 
         return self
 
@@ -311,9 +306,6 @@ class Buffer(object):
                 # slide the gap to the right
                 self.__gap_start += 1
                 self.__gap_end += 1
-
-            # the gap start now matches the cursor, so mark it 'clean'
-            self.__cursor_dirty = False
 
         return self
 
