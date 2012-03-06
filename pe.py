@@ -1,215 +1,245 @@
 #!/usr/bin/env python
 import array
-import re
 
-class Buffer(object):
+class GapBuffer(object):
     """
-    Represents unicode text using a gap buffer. Can be initialized with any
-    iterable item, as long as that item yields unicode characters during
-    iteration.
+    Represents a sequence of identically-typed items using a gap buffer. Can be
+    initialized with any iterable item, as long as the items in the iterable are
+    all of the same type. Uses an array.array internally to store data.
     """
 
-    def __init__(self, initial_content=None):
+    # type information for the different types our internal array can take on.
+    # used to initialize the internal array to some non-zero size and to get
+    # formal names for the type codes.
+    TYPE_INFO = {
+        "c": (str(' '), "character"),
+        "b": (0, "signed character"),
+        "B": (0, "unsigned character"),
+        "u": (unicode(' '), "unicode character"),
+        "h": (0, "signed short"),
+        "H": (0, "unsigned short"),
+        "i": (0, "signed int"),
+        "I": (0L, "unsigned int"),
+        "l": (0L, "signed long"),
+        "L": (0L, "unsigned long"),
+        "f": (0.0, "float"),
+        "d": (0.0, "double")
+    }
 
-        # points to first empty space after left text
+    def __init__(self, typecode, initial_content=[], min_gap_size=10):
+        """
+        TODO
+        """
+
+        # minimum space to create for the new gap when resizing the current one
+        self.__min_gap_size = min_gap_size
+
+        # allocate the initial gap for the internal buffer. if the typecode is
+        # invalid, array.array throws a nice ValueError for us.
+        item = GapBuffer.TYPE_INFO[typecode][0]
+        self.__buf = array.array(typecode, (item for i in xrange(min_gap_size)))
+
+        # first space of the gap, initially always at the start of the buffer
         self.__gap_start = 0
 
-        # points to first taken space at beginning of right text
-        self.__gap_end = 0
+        # first space after the final space in the gap, even if past the end of
+        # the internal buffer. since our buffer is (at the moment) all-gap, it
+        # starts as the length of the buffer.
+        self.__gap_end = len(self.__buf)
 
-        # where the gap should be moved to when it needs to be moved
-        self.__cursor = 0
+        # add the initial content (defaults to an empty iterable)
+        try:
+            # add the initial content to the end of the buffer
+            self.__buf.extend(initial_content)
 
-        # the minimum amount of space to create when resizing the gap
-        self.__min_gap_len = 10
+        except TypeError:
+            # map array's TypeError to our own version of the same
+            raise TypeError(self.__class__.__name__ + " items must be of type "
+                    + GapBuffer.TYPE_INFO[typecode][1])
 
-        # the end of content in the buffer
-        self.__content_end = 0
-
-        # NOTE: we set the content end individually later so we can allow
-        # initial_content objects that have no __len__ method.
-
-        # initialize the buffer we use to hold text data in, a unicode array
-        if initial_content is None:
-            # insert placeholder content if no initial content was specified
-            self.__buf = array.array("u", u" " * 10)
-            self.__content_end = 0
-        else:
-            # insert the initial content and set the content end pointer for it
-            self.__buf = array.array("u", initial_content)
-            self.__content_end = len(self.__buf)
-
-    @property
-    def cursor(self):
-        """Get the current position of the cursor."""
-        # account for the cursor having it's position deleted
-        return min(self.__cursor, len(self))
-
-    @cursor.setter
-    def cursor(self, position):
-        """Move the cursor within the buffer."""
-
-        # NOTE: does not move the gap! when moved, the cursor position is marked
-        # as 'dirty' so that when text changes happen, the gap can be moved
-        # accordingly elsewhere.
-
-        # move the cursor
-        self.__cursor = position
-
-        # constrain the cursor to the buffer's virtual boundaries
-        if self.__cursor < 0:
-            self.__cursor = 0
-        elif self.__cursor > len(self):
-            self.__cursor = len(self)
-
-    @property
-    def __cursor_dirty(self):
-        """Return whether the cursor matches the gap start."""
-        return self.__cursor != self.__gap_start
+        # the space immediately following the final item in the buffer,
+        # including space for the gap. i.e., if the gap is at the very end of
+        # the buffer, the content end is equivalent to the gap end.
+        self.__content_end = len(self.__buf)
 
     @property
     def __gap_len(self):
         """Get the length of the current gap."""
         return self.__gap_end - self.__gap_start
 
-    @property
-    def __left_len(self):
-        """Get the length of the text to the left of the gap's start."""
-        return self.__gap_start
-
-    @property
-    def __right_len(self):
-        """Get the length of the text to the right of the gap's end."""
-        return self.__content_end - self.__gap_end
-
-    #
-    # NOTE: together, __len__ and __getitem__ make for iteration!
-    #
-
     def __len__(self):
-        """Get the length of the buffer's text."""
-        return self.__left_len + self.__right_len
+        """Get the length of the buffer."""
+        return self.__content_end - self.__gap_len
 
-    def __getitem__(self, index):
-        """Get the character or slice at some index."""
+    def __eq__(self, other):
+        """Determine whether this is item-equivalent to another iterable."""
 
-        # get a slice rather than an index if necessary
-        if isinstance(index, slice):
-            # unpack 'indices()' into xrange, then pass generator to new Buffer
-            return u''.join(self[i] for i in xrange(*index.indices(len(self))))
+        other_len = 0
+        for index, other_item in enumerate(other):
+            # if the other item is longer or our own iteration is over...
+            if index >= len(self) or self[index] != other_item:
+                return False
+
+            other_len += 1
+
+        return other_len == len(self)
+
+    def __contains__(self, item):
+        """Return True if the given item is in us, False otherwise."""
+
+        raise NotImplementedError()
+
+        # TODO: implement substring test for str and unicode buffers
+
+        for self_item in self:
+            if item == self_item:
+                return True
+
+        return False
+
+    def __add__(self, other):
+        """Concatenate the other iterable to this one."""
+        raise NotImplementedError()
+
+    def __mul__(self, n):
+        """
+        Concatenate ourself to ourself some number of times and return the
+        result.
+        """
+
+        raise NotImplementedError()
+
+    def __getitem__(self, x):
+        """Get the item or slice at the given index."""
+
+        # handle slicing with a 'step' (normal format is handled by __getslice__)
+        if isinstance(x, slice):
+            return self.__get_slice(x)
+        return self.__get_index(x)
+
+    def __get_index(self, i):
+        """Get the item at some index."""
+
+        # constrain index bounds
+        if i >= len(self):
+            raise IndexError(self.__class__.__name__ + " index out of range")
+
+        # if before the gap, access buffer directly, else account for gap
+        index = i if i < self.__gap_start else i + self.__gap_len
+        return self.__buf[index]
+
+    def __get_slice(self, s):
+        """Get the sequence at the given slice."""
+
+        # unpack 'indices()' into xrange as a generator for our items
+        return GapBuffer(self.__buf.typecode,
+                (self[i] for i in xrange(*s.indices(len(self)))))
+
+    def __setitem__(self, x, value):
+        """Set an index or slice to some value."""
+
+        if isinstance(x, slice):
+            return self.__set_slice(x, value)
+        return self.__set_index(x, value)
+
+    def __set_index(self, i, value):
+        """Set the item at some index."""
+
+        if i >= len(self):
+            raise IndexError(self.__class__.__name__ + " index out of range")
+
+        index = i if i < self.__gap_start else i + self.__gap_len
+        self.__buf[index] = value
+
+    def __set_slice(self, s, value):
+        """Set the slice at some index."""
+
+        raise NotImplementedError()
+
+        # get shorthand values for the indices of the slice
+        stop, start, step = s.indices(len(self))
+
+        # if we can get the length of the value and get its items directly,
+        # and the value is the same size as what it's replacing, do a direct
+        # replace without moving the gap.
+        slice_len = stop - start
+        if (hasattr(value, "__len__") and hasattr(value, "__getitem__")
+                and len(value) == slice_len):
+            # do a direct replacement
+            for vi, si in enumerate(xrange(*s.indices(len(self)))):
+                self[si] = value[vi]
         else:
-            # constrain index bounds
-            if index >= len(self):
-                raise IndexError(self.__class__.__name__ + " index out of range")
+            for vi, si in enumerate(xrange(*s.indices(len(self)))):
+                self[si] = value[vi]
 
-            # if before the gap, access buffer directly, else account for gap
-            i = index if index < self.__gap_start else index + self.__gap_len
+    def __delitem__(self, x):
+        """Delete some index or slice."""
 
-            # access the buffer
-            return self.__buf[i]
+        if isinstance(x, slice):
+            return self.__del_slice(x)
+        return self.__del_index(x)
 
-    def __setitem__(self, index, value):
-        """Set the character or slice at some index."""
+    def __del_index(self, i):
+        """Delete the item at some index."""
+        raise NotImplementedError()
 
-        # set a slice rather than an index if necessary
-        if isinstance(index, slice):
-            # get the values we'll need
-            start, stop, step = (index.start, index.stop, index.step)
+    def __del_slice(self, s):
+        """Delete some slice."""
+        raise NotImplementedError()
 
-            # set default values
-            start = 0 if start is None else start
-            stop = len(self) if stop is None else stop
-            step = 1 if step is None else step
-
-            print start, stop, step
-
-            # if we can get the length of the value and get its items directly,
-            # and the value is the same size as what it's replacing, do a direct
-            # replace.
-            slice_len = stop - start
-            if (hasattr(value, "__len__") and hasattr(value, "__getitem__")
-                    and len(value) == slice_len):
-                # do a direct replacement
-                for vi, si in enumerate(xrange(start, stop, step)):
-                    self[si] = value[vi]
-            else:
-                # store the cursor position
-                old_cursor = self.cursor
-
-                # delete old slice and insert the new one
-                self.delete(stop - start, start)
-                self.insert(value, start)
-
-                # restore the cursor position while accounting for size change
-                self.cursor = old_cursor
-        else:
-            if index >= len(self):
-                raise IndexError(self.__class__.__name__ + " index out of range")
-
-            i = index if index < self.__gap_start else index + self.__gap_len
-            self.__buf[i] = value
-
-    def insert(self, text, position=None):
+    def index(self, item, start=0, end=None):
         """
-        Insert text before the cursor's current position.
-
-        If 'position' is specified, moves the cursor to the given position
-        before inserting the text.
-
-        Moves the cursor to the last character of the inserted text.
-
-        'text' must be return unicode characters during iteration, or a
-        TypeError will be raised.
+        Return the index of the first occurence of 'item' in this GapBuffer such
+        that 'start' (default 0) <= the index of 'item' < end (default end of
+        the buffer). Return negative if the item was not found.
         """
 
-        # first move the cursor to the position if a position was specified
-        if position is not None:
-            self.cursor = position
+        raise NotImplementedError()
 
-        # move the gap to the cursor
-        self.__move_gap()
+    def count(self, item):
+        """Return the number of times 'item' occurs in this GapBuffer."""
+        raise NotImplementedError()
 
-        # ensure the gap is large enough for the text being inserted
-        self.__resize_gap(len(text))
+    def append(self, item):
+        """Append the 'item' to this GapBuffer."""
+        raise NotImplementedError()
 
-        # insert text at left gap edge while moving the gap start forward
-        for c in text:
-            self.__buf[self.__gap_start] = c
-            self.__gap_start += 1
-
-        # move the cursor to match the new gap start
-        self.__cursor = self.__gap_start
-
-        return self
-
-    def delete(self, length, position=None):
+    def extend(self, other):
         """
-        Remove text starting with the character at the cursor's current position
-        and ending after 'length' characters have been removed.
-
-        If 'position' is specified, moves the cursor to the given position
-        before deleting the text.
-
-        If 'length' is larger than the size of the buffer's remaining content,
-        the text from the cursor to the end of the buffer is removed.
+        Append all the items from the other iterable onto the end of this
+        GapBuffer.
         """
 
-        if position is not None:
-            self.cursor = position
+        raise NotImplementedError()
 
-        if length < 0:
-            raise ValueError("length must be greater than or equal to 0")
+    def insert(self, index, item):
+        """Insert an item at the given index."""
+        raise NotImplementedError()
 
-        # don't do anything if nothing is to be deleted
-        if length != 0:
-            # move the gap to the cursor
-            self.__move_gap()
+    def pop(self, index=None):
+        """Remove the item at 'index' (default final item) and returns it."""
 
-            # increase the size of the gap to consume the deleted characters,
-            # but only up to the size of the internal buffer.
-            self.__gap_end += min(length, len(self.__buf))
+        if len(self) == 0:
+            raise IndexError("pop from empty " + self.__class__.__name__)
 
-        return self
+        # default index to the end of the buffer
+        index = len(self) - 1 if index is None else index
+
+        item = self[index]
+        del self[index]
+        return item
+
+    def remove(self, item):
+        """Remove the first occurence of 'item' in this GapBuffer."""
+        del self[self.index(item)]
+
+    def reverse(self):
+        """Reverse the items of this GapBuffer in-place."""
+        raise NotImplementedError()
+
+    def sort(self, comparator=None, key=None, reverse=False):
+        """Sort the items of this GapBuffer in-place."""
+        raise NotImplementedError()
 
     def debug_view(self):
         """
@@ -229,7 +259,6 @@ class Buffer(object):
         chars = [
             ("s", self.__gap_start),
             ("e", self.__gap_end),
-            ("^", self.__cursor),
             ("$", self.__content_end)
         ]
 
@@ -256,23 +285,42 @@ class Buffer(object):
                     break
 
         # build the final string
-        s = [u"'", unicode(self), u"', ", unicode(len(self)), u"\n",
-                self.__buf.tounicode(), u"\n"]
+        s = [
+            u"'" + unicode(self) + u"', " + unicode(len(self)),
+            self.__buf.tounicode()
+        ]
 
         for row in rows:
+            t = []
             for c in row:
-                s.append(c if c is not None else u" ")
-            s.append(u'\n')
+                t.append(c if c is not None else u" ")
+            s.append(u"".join(t))
 
-        return u''.join(s)
+        return u'\n'.join(s)
+
+    def __resize_buf(self, target_size, factor=(1.0 / 16)):
+        """
+        Ensure that the buffer is at least as large as some target by repeatedly
+        increasing its size by some factor (default 1/16).
+        """
+
+        # prevent decreasing or failure to increase buffer size
+        assert factor > 0
+
+        # increase the buffer size by our factor until it's long enough
+        item = GapBuffer.TYPE_INFO[self.__buf.typecode][0]
+        while len(self.__buf) < target_size:
+            extend_len = max(1, int((1.0 + factor) * (1 + len(self.__buf))))
+            self.__buf.extend(item for i in xrange(extend_len))
 
     def __resize_gap(self, target_size):
         """Ensure that the gap is at least as large as some target."""
 
-        if self.__gap_len < target_size:
+        # TODO: ensure buf is large enough to support new gap size
 
+        if self.__gap_len < target_size:
             # calculate size increase of the gap
-            gap_delta = target_size + self.__min_gap_len - self.__gap_len
+            gap_delta = target_size + self.__min_gap_size - self.__gap_len
 
             # make room for the current content and the new gap
             self.__resize_buf(len(self) + gap_delta)
@@ -285,53 +333,74 @@ class Buffer(object):
             self.__gap_end += gap_delta
             self.__content_end += gap_delta
 
-        return self
+    def __move_gap(self, index):
+        """Move the gap to some index."""
 
-    def __resize_buf(self, target_size):
-        """Ensure that the buffer is at least as large as some target."""
+        # TODO: test corner cases
 
-        # double the size while the buffer is shorter than the target length
-        while len(self.__buf) < target_size:
-            self.__buf.extend(self.__buf)
+        assert 0 <= index < len(self.__buf)
 
-        return self
+        # move the gap left as far as necessary
+        while self.__gap_start > index:
+            # slide the gap to the left
+            self.__gap_start -= 1
+            self.__gap_end -= 1
 
-    def __move_gap(self):
-        """
-        Move the gap to the current cursor position if the cursor is dirty.
-        """
+            # copy the gap's former preceding character to the gap's old
+            # final slot.
+            self.__buf[self.__gap_end] = self.__buf[self.__gap_start]
 
-        if self.__cursor_dirty:
-            # move the gap left as far as necessary
-            while self.__gap_start > self.__cursor:
-                # slide the gap to the left
-                self.__gap_start -= 1
-                self.__gap_end -= 1
+        # move the gap right as far as necessary
+        while self.__gap_start < index:
+            # copy the gap's following character to the gap's first slot.
+            self.__buf[self.__gap_start] = self.__buf[self.__gap_end]
 
-                # copy the gap's former preceding character to the gap's old
-                # final slot.
-                self.__buf[self.__gap_end] = self.__buf[self.__gap_start]
-
-            # move the gap right as far as necessary
-            while self.__gap_start < self.__cursor:
-                # copy the gap's following character to the gap's first slot.
-                self.__buf[self.__gap_start] = self.__buf[self.__gap_end]
-
-                # slide the gap to the right
-                self.__gap_start += 1
-                self.__gap_end += 1
-
-        return self
-
-    def __unicode__(self):
-        """Get the buffer's entire text."""
-        return self[:]
+            # slide the gap to the right
+            self.__gap_start += 1
+            self.__gap_end += 1
 
     def __str__(self):
-        return unicode(self)
+        """Return the string representation of the buffer's contents."""
+
+        # NOTE: we do this separately from the unicode version to prevent weird
+        # str/unicode conversions.
+
+        # do more compact represenstations for string and unicode types
+        if isinstance(self[0], basestring):
+            return ''.join(c for c in self)
+
+        # turn all other types into a simple list
+        return repr([i for i in self])
+
+    def __unicode__(self):
+        """Return the unicode representation of the buffer's contents."""
+
+        # do more compact represenstations for string and unicode types
+        if isinstance(self[0], basestring):
+            return u''.join(c for c in self)
+
+        # turn all other types into a simple list
+        return unicode(repr([i for i in self]))
 
     def __repr__(self):
-        return unicode(self.__class__.__name__ + "(" + repr(self[:]) + ")")
+        # class name, typecode, and opening paren
+        s = unicode(self.__class__.__name__ + "(" + repr(self.__buf.typecode))
+
+        # add the content representation if there is any
+        if len(self) > 0:
+            s += u", "
+
+            # do more compact represenstations for string and unicode types
+            if isinstance(self[0], str):
+                s += repr(''.join(c for c in self))
+            elif isinstance(self[0], unicode):
+                s += repr(u''.join(c for c in self))
+            else:
+                # turn all other types into a simple list
+                s += repr([i for i in self])
+
+        # add close paren and return
+        return s + u")"
 
 if __name__ == "__main__":
     b = Buffer()
