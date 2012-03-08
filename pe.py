@@ -238,8 +238,12 @@ class GapBuffer(object):
         del self[self.index(item)]
 
     def reverse(self):
-        """Reverse the items of this GapBuffer in-place."""
-        raise NotImplementedError()
+        """Reverse the items in this GapBuffer in-place."""
+
+        # only reverse if necessary
+        if len(self) > 1:
+            for i in xrange(len(self) / 2):
+                self[-(i + 1)], self[i] = self[i], self[-(i + 1)]
 
     def sort(self, comparator=None, key=None, reverse=False):
         """Sort the items of this GapBuffer in-place."""
