@@ -38,7 +38,8 @@ class TestGapBuffer(unittest.TestCase):
         """
 
         for typecode in self.valid_content:
-            gapbuffer.gapbuffer(typecode, (i for i in self.valid_content[typecode]))
+            gapbuffer.gapbuffer(typecode,
+                    (i for i in self.valid_content[typecode]))
 
     def test_init_content_empty(self):
         """Can we init for every typecode with zero-length initial content?"""
