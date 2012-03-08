@@ -210,7 +210,11 @@ class GapBuffer(object):
         GapBuffer.
         """
 
-        raise NotImplementedError()
+        # put the gap at the beginning of the buffer
+        self.__move_gap(0)
+
+        # (try to) add the other iterable to the end of the existing buffer
+        self.__buf.extend(other)
 
     def insert(self, index, item):
         """Insert an item at the given index."""
