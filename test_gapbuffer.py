@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
-import pe
+import gapbuffer
 
 class TestGapBuffer(unittest.TestCase):
     def setUp(self):
@@ -25,26 +25,26 @@ class TestGapBuffer(unittest.TestCase):
         """Can we init for every typecode without exceptions?"""
 
         for typecode in self.valid_content:
-            pe.GapBuffer(typecode)
+            gapbuffer.gapbuffer(typecode)
 
     def test_init_content(self):
         """Can we init for every typecode with valid initial content?"""
 
         for typecode in self.valid_content:
-            pe.GapBuffer(typecode, self.valid_content[typecode])
+            gapbuffer.gapbuffer(typecode, self.valid_content[typecode])
 
     def test_init_content_generator(self):
         """Can we init for every typecode with valid initial content generator?
         """
 
         for typecode in self.valid_content:
-            pe.GapBuffer(typecode, (i for i in self.valid_content[typecode]))
+            gapbuffer.gapbuffer(typecode, (i for i in self.valid_content[typecode]))
 
     def test_init_content_empty(self):
         """Can we init for every typecode with zero-length initial content?"""
 
         for typecode in self.valid_content:
-            b = pe.GapBuffer(typecode, [])
+            b = gapbuffer.gapbuffer(typecode, [])
             self.assertEqual(len(b), 0)
 
     def test_init_content_empty_generator(self):
@@ -53,7 +53,7 @@ class TestGapBuffer(unittest.TestCase):
         """
 
         for typecode in self.valid_content:
-            pe.GapBuffer(typecode, (i for i in []))
+            gapbuffer.gapbuffer(typecode, (i for i in []))
 
     def test_init_char_content_wrong_type(self):
         """Does giving 'c' typecode buffers incorrect types raise the correct
@@ -64,7 +64,7 @@ class TestGapBuffer(unittest.TestCase):
         for typecode in self.valid_content:
             if typecode != "c":
                 with self.assertRaises(TypeError):
-                    pe.GapBuffer("c", self.valid_content[typecode])
+                    gapbuffer.gapbuffer("c", self.valid_content[typecode])
 
     def test_init_unicode_content_wrong_type(self):
         """Does giving 'u' typecode buffers incorrect types raise the correct
@@ -75,14 +75,14 @@ class TestGapBuffer(unittest.TestCase):
         for typecode in self.valid_content:
             if typecode != "u":
                 with self.assertRaises(TypeError):
-                    pe.GapBuffer("u", self.valid_content[typecode])
+                    gapbuffer.gapbuffer("u", self.valid_content[typecode])
 
     def test_eq(self):
         """Test all typecodes for equality to their respective initial content.
         """
 
         for typecode in self.valid_content:
-            b = pe.GapBuffer(typecode, self.valid_content[typecode])
+            b = gapbuffer.gapbuffer(typecode, self.valid_content[typecode])
             self.assertEqual(self.valid_content[typecode], b)
 
 if __name__ == "__main__":

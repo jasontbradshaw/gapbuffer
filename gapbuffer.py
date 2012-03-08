@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import array
 
-class GapBuffer(object):
+class gapbuffer(object):
     """
     Represents a sequence of identically-typed items using a gap buffer. Can be
     initialized with any iterable item, as long as the items in the iterable are
@@ -36,7 +36,7 @@ class GapBuffer(object):
 
         # allocate the initial gap for the internal buffer. if the typecode is
         # invalid, array.array throws a nice ValueError for us.
-        item = GapBuffer.TYPE_INFO[typecode][0]
+        item = gapbuffer.TYPE_INFO[typecode][0]
         self.__buf = array.array(typecode, (item for i in xrange(min_gap_size)))
 
         # first space of the gap, initially always at the start of the buffer
@@ -55,7 +55,7 @@ class GapBuffer(object):
         except TypeError:
             # map array's TypeError to our own version of the same
             raise TypeError(self.__class__.__name__ + " items must be of type "
-                    + GapBuffer.TYPE_INFO[typecode][1])
+                    + gapbuffer.TYPE_INFO[typecode][1])
 
         # the space immediately following the final item in the buffer,
         # including space for the gap. i.e., if the gap is at the very end of
@@ -132,7 +132,7 @@ class GapBuffer(object):
         """Get the sequence at the given slice."""
 
         # unpack 'indices()' into xrange as a generator for our items
-        return GapBuffer(self.__buf.typecode,
+        return gapbuffer(self.__buf.typecode,
                 (self[i] for i in xrange(*s.indices(len(self)))))
 
     def __setitem__(self, x, value):
@@ -189,7 +189,7 @@ class GapBuffer(object):
 
     def index(self, item, start=0, end=None):
         """
-        Return the index of the first occurence of 'item' in this GapBuffer such
+        Return the index of the first occurence of 'item' in this gapbuffer such
         that 'start' (default 0) <= the index of 'item' < end (default end of
         the buffer). Return negative if the item was not found.
         """
@@ -197,17 +197,17 @@ class GapBuffer(object):
         raise NotImplementedError()
 
     def count(self, item):
-        """Return the number of times 'item' occurs in this GapBuffer."""
+        """Return the number of times 'item' occurs in this gapbuffer."""
         raise NotImplementedError()
 
     def append(self, item):
-        """Append the 'item' to this GapBuffer."""
+        """Append the 'item' to this gapbuffer."""
         self.insert(len(self), item)
 
     def extend(self, other):
         """
         Append all the items from the other iterable onto the end of this
-        GapBuffer.
+        gapbuffer.
         """
 
         # put the gap at the beginning of the buffer
@@ -234,11 +234,11 @@ class GapBuffer(object):
         return item
 
     def remove(self, item):
-        """Remove the first occurence of 'item' in this GapBuffer."""
+        """Remove the first occurence of 'item' in this gapbuffer."""
         del self[self.index(item)]
 
     def reverse(self):
-        """Reverse the items in this GapBuffer in-place."""
+        """Reverse the items in this gapbuffer in-place."""
 
         # only reverse if necessary
         if len(self) > 1:
@@ -246,7 +246,7 @@ class GapBuffer(object):
                 self[-(i + 1)], self[i] = self[i], self[-(i + 1)]
 
     def sort(self, comparator=None, key=None, reverse=False):
-        """Sort the items of this GapBuffer in-place."""
+        """Sort the items of this gapbuffer in-place."""
         raise NotImplementedError()
 
     def debug_view(self):
@@ -316,7 +316,7 @@ class GapBuffer(object):
         assert factor > 0
 
         # increase the buffer size by our factor until it's long enough
-        item = GapBuffer.TYPE_INFO[self.__buf.typecode][0]
+        item = gapbuffer.TYPE_INFO[self.__buf.typecode][0]
         while len(self.__buf) < target_size:
             extend_len = max(1, int((1.0 + factor) * (1 + len(self.__buf))))
             self.__buf.extend(item for i in xrange(extend_len))
@@ -409,31 +409,3 @@ class GapBuffer(object):
 
         # add close paren and return
         return s + u")"
-
-if __name__ == "__main__":
-    b = Buffer()
-    print b.debug_view()
-
-    b.insert(u"Hello!")
-    print b.debug_view()
-
-    b.cursor -= 1
-    print b.debug_view()
-
-    b.insert(u", world")
-    print b.debug_view()
-
-    b.cursor -= 5
-    print b.debug_view()
-
-    b.delete(5)
-    print b.debug_view()
-
-    b.insert(u"pants")
-    print b.debug_view()
-
-    b.cursor = 0
-    print b.debug_view()
-
-    b.insert(u"Whoa! ")
-    print b.debug_view()
