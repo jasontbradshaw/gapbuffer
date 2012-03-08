@@ -214,7 +214,7 @@ class GapBuffer(object):
 
     def insert(self, index, item):
         """Insert an item at the given index."""
-        raise NotImplementedError()
+        self[index:index] = [item]
 
     def pop(self, index=None):
         """Remove the item at 'index' (default final item) and returns it."""
