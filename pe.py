@@ -202,7 +202,7 @@ class GapBuffer(object):
 
     def append(self, item):
         """Append the 'item' to this GapBuffer."""
-        raise NotImplementedError()
+        self.insert(len(self), item)
 
     def extend(self, other):
         """
