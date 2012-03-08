@@ -107,7 +107,16 @@ class gapbuffer(object):
         result.
         """
 
-        raise NotImplementedError()
+        multiplied = gapbuffer(self.__buf.typecode)
+
+        # don't concatenate if 0 or less was specified
+        if n <= 0:
+            return multiplied
+
+        for i in xrange(n):
+            multiplied.extend(self)
+
+        return multiplied
 
     def __getitem__(self, x):
         """Get the item or slice at the given index."""
