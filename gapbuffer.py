@@ -98,8 +98,12 @@ class gapbuffer(object):
         return False
 
     def __add__(self, other):
-        """Concatenate the other iterable to this one."""
-        raise NotImplementedError()
+        """Concatenate the other iterable to this one and return the result."""
+
+        added = gapbuffer(self.__buf.typecode, self)
+        added.extend(other)
+
+        return added
 
     def __mul__(self, n):
         """
