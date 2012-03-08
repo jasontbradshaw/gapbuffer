@@ -344,7 +344,7 @@ class GapBuffer(object):
     def __move_gap(self, index):
         """Move the gap to some index."""
 
-        # TODO: test corner cases
+        # TODO: test corner cases (0-length gap, gap to ends, etc.)
 
         assert 0 <= index < len(self.__buf)
 
