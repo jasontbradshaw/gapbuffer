@@ -86,6 +86,19 @@ class TestGapBuffer(unittest.TestCase):
             b = gapbuffer(typecode, self.valid_content[typecode])
             self.assertEqual(self.valid_content[typecode], b)
 
+    def test_eq_different_lengths(self):
+        """Test all typecodes for inequality to similar, different-length
+        content.
+        """
+
+        for typecode in self.valid_content:
+            b = gapbuffer(typecode, self.valid_content[typecode])
+            self.assertNotEqual(self.valid_content[typecode] * 2, b)
+
+        for typecode in self.valid_content:
+            b = gapbuffer(typecode, self.valid_content[typecode][:2])
+            self.assertNotEqual(self.valid_content[typecode], b)
+
     def test_in_nonstring(self):
         """Do non string-based buffers contain items that are in them?"""
 
@@ -280,6 +293,36 @@ class TestGapBuffer(unittest.TestCase):
             for i in xrange(len(content)):
                 self.assertEqual(content[i], b[i])
 
+    def test_get_index_negative(self):
+        """Does getting an item at a negative index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            for i in xrange(1, len(content) + 1):
+                self.assertEqual(content[-i], b[-i])
+
+    def test_get_index_out_of_bounds(self):
+        """Does getting an out-of-bounds index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            with self.assertRaises(IndexError):
+                b[len(b) + 1]
+
+    def test_get_index_negative_out_of_bounds(self):
+        """Does getting a negative out-of-bounds index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            with self.assertRaises(IndexError):
+                b[-(len(b) + 1)]
+
     def test_set_index(self):
         """Does setting an item at some index work?"""
 
@@ -290,6 +333,306 @@ class TestGapBuffer(unittest.TestCase):
             for index, item in enumerate(reversed(content)):
                 b[index] = item
                 self.assertEqual(item, b[index])
+
+    def test_set_index_negative(self):
+        """Does setting an item at a negative index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            for index, item in enumerate(reversed(content)):
+                b[-(index + 1)] = item
+
+            self.assertEqual(reversed(content), b)
+
+    def test_set_index_out_of_bounds(self):
+        """Does setting an out-of-bounds index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            with self.assertRaises(IndexError):
+                b[len(b) + 1] = item
+
+    def test_set_index_negative_out_of_bounds(self):
+        """Does setting a negative out-of-bounds index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            with self.assertRaises(IndexError):
+                b[-(len(b) + 1)] = item
+
+    def test_del_index(self):
+        """Does deleting an index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            del b[0]
+            self.assertEqual(b, content[1:])
+
+    def test_del_index_negative(self):
+        """Does deleting a negative index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            del b[-1]
+            self.assertEqual(b, content[:-1])
+
+    def test_del_index_out_of_bounds(self):
+        """Does deleting an out-of-bounds index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            # can't delete out-of-bounds index
+            with self.assertRaises(IndexError):
+                del b[len(b) + 1]
+
+    def test_del_index_negative_out_of_bounds(self):
+        """Does deleting a negative out-of-bounds index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            # can't delete out-of-bounds index
+            with self.assertRaises(IndexError):
+                del b[-(len(b) + 1)]
+
+    def test_get_slice(self):
+        """Does getting a slice work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            self.assertEqual(b[:], content[:])
+            self.assertEqual(b[1:], content[1:])
+            self.assertEqual(b[-2:], content[-2:])
+            self.assertEqual(b[len(b) * 2:], content[len(content) * 2:])
+
+    def test_get_slice_extended(self):
+        """Does getting an extended slice work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            self.assertEqual(b[::], content[::])
+            self.assertEqual(b[::2], content[::2])
+            self.assertEqual(b[1::2], content[1::2])
+            self.assertEqual(b[2::2], content[2::2])
+            self.assertEqual(b[::len(b)], content[::len(content)])
+
+    def test_set_slice_empty(self):
+        """Does setting an empty slice work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[1:3] = []
+        content[1:3] = []
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_entire_range(self):
+        """Does setting the entire range work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[:] = [9, 9, 9]
+        content[:] = [9, 9, 9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_after_end(self):
+        """Does setting a slice past the end of the buffer work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[len(b) * 2:] = [9, 9, 9]
+        content[len(content) * 2:] = [9, 9, 9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_shorter(self):
+        """Does setting a shorter-length slice work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[1:3] = [9]
+        content[1:3] = [9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_longer(self):
+        """Does setting a longer-length slice work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[1:3] = [9, 9, 9, 9]
+        content[1:3] = [9, 9, 9, 9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_same_length(self):
+        """Does setting an equivalent-length slice work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[1:3] = [9, 9]
+        content[1:3] = [9, 9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_empty_slice(self):
+        """Does setting an empty slice work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[0:0] = [9]
+        content[0:0] = [9]
+
+        self.assertEqual(b, content)
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[1:1] = [9]
+        content[1:1] = [9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_extended_odd_length(self):
+        """Does setting an extended slice on an odd-length buffer work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[::2] = [9, 9, 9]
+        content[::2] = [9, 9, 9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_extended_even_length(self):
+        """Does setting an extended slice on an even-length buffer work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        b[::2] = [9, 9, 9]
+        content[::2] = [9, 9, 9]
+
+        self.assertEqual(b, content)
+
+    def test_set_slice_extended_too_short(self):
+        """Does setting a too-short extended slice on a buffer work?"""
+
+        with self.assertRaises(ValueError):
+            b = gapbuffer("i", [0, 1, 2, 3, 4])
+            b[::2] = [9]
+
+    def test_set_slice_extended_too_long(self):
+        """Does setting a too-long extended slice on a buffer work?"""
+
+        with self.assertRaises(ValueError):
+            b = gapbuffer("i", [0, 1, 2, 3, 4])
+            b[::2] = [9, 9, 9, 9, 9, 9, 9, 9]
+
+    def test_del_slice(self):
+        """Does deleting a slice work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        del b[1:3]
+        del content[1:3]
+
+        self.assertEqual(b, content)
+
+    def test_del_slice_entire_range(self):
+        """Does deleting the entire range work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        del b[:]
+        del content[:]
+
+        self.assertEqual(b, content)
+
+    def test_del_slice_after_end(self):
+        """Does deleting a slice after the end of the buffer work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        del b[len(b) * 2:]
+        del content[len(content) * 2:]
+
+        self.assertEqual(b, content)
+
+    def test_del_slice_empty_slice(self):
+        """Does deleting an empty slice work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        del b[0:0]
+        del b[1:1]
+        del content[0:0]
+        del content[1:1]
+
+        self.assertEqual(b, content)
+
+    def test_del_slice_extended_odd_length(self):
+        """Does deleting an extended slice on an odd-length buffer work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        del b[::2]
+        del content[::2]
+
+        self.assertEqual(b, content)
+
+    def test_del_slice_extended_even_length(self):
+        """Does deleting an extended slice on an even-length buffer work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        del b[::2]
+        del content[::2]
+
+        self.assertEqual(b, content)
+
+    def test_del_slice_extended_very_large_range(self):
+        """Does deleting an extended slice with a very larger range work?"""
+
+        # should only delete first item
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        del b[::len(b) * 2]
+        del content[::len(content) * 2]
+
+        self.assertEqual(b, content)
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
