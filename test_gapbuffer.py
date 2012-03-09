@@ -634,6 +634,152 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(b, content)
 
+    def test_del_slice_congruency(self):
+        """Is deleting a slice equivalent to setting it to an empty slice?"""
+
+        # entire range
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
+        b2 = gapbuffer("i", b1)
+
+        b1[:] = []
+        del b2[:]
+
+        self.assertEqual(b1, b2)
+
+        # sub-range
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
+        b2 = gapbuffer("i", b1)
+
+        b1[1:3] = []
+        del b2[1:3]
+
+        self.assertEqual(b1, b2)
+
+    def test_del_slice_extended_congruency(self):
+        """Is deleting an extended slice equivalent to setting it to an empty
+        slice?
+        """
+
+        # entire range
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
+        b2 = gapbuffer("i", b1)
+
+        b1[::] = []
+        del b2[::]
+
+        self.assertEqual(b1, b2)
+
+        # sub-range
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
+        b2 = gapbuffer("i", b1)
+
+        b1[::2] = []
+        del b2[::2]
+
+        self.assertEqual(b1, b2)
+
+    def test_append(self):
+        """Does appending an item work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        content.append(9)
+        b.append(9)
+
+        self.assertEqual(b, content)
+
+    def test_extend(self):
+        """Does extending with an iterable work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        content.extend([9, 9, 9])
+        b.extend([9, 9, 9])
+
+        self.assertEqual(b, content)
+
+    def test_extend_with_self(self):
+        """Does extending with self work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        content.extend(content)
+        b.extend(b)
+
+        self.assertEqual(b, content)
+
+    def test_extend_empty(self):
+        """Does extending with an empty iterable work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        content.extend([])
+        b.extend([])
+
+        self.assertEqual(b, content)
+
+    def test_append_congruency(self):
+        """Is appending an item the same as setting the final slice to a one-
+        element list?
+        """
+
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
+        b2 = gapbuffer("i", b1)
+
+        b1[len(b1):len(b1)] = [9]
+        b2.append(9)
+
+        self.assertEqual(b1, b2)
+
+    def test_extend_congruency(self):
+        """Is extending a buffer the same as setting the final slice to an
+        iterable?
+        """
+
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
+        b2 = gapbuffer("i", b1)
+
+        b1[len(b1):len(b1)] = [9, 9, 9]
+        b2.extend([9, 9, 9])
+
+        self.assertEqual(b1, b2)
+
+    def test_count(self):
+        """Does counting items work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.count(2), b.count(2))
+
+    def test_count_multiples(self):
+        """Does counting multiple items work?"""
+
+        content = [0, 1, 3, 3, 3, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.count(3), b.count(3))
+
+    def test_count_does_not_exist(self):
+        """Does counting non-existing items work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.count(9), b.count(9))
+
+    def test_count_wrong_type(self):
+        """Does counting incorrectly-typed items work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.count([]), b.count([]))
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
