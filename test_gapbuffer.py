@@ -894,6 +894,68 @@ class TestGapBuffer(unittest.TestCase):
         self.assertEqual(content.index(0, 0, -(len(content) * 2)),
                 b.index(0, 0, -(len(b) * 2)))
 
+    def test_insert(self):
+        """Does insert work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        b.insert(0, 9)
+        content.insert(0, 9)
+
+        self.assertEqual(b, content)
+
+    def test_insert_into_empty(self):
+        """Does insertion into an empty buffer work?"""
+
+        content = []
+        b = gapbuffer("i")
+
+        b.insert(0, 9)
+        content.insert(0, 9)
+
+        self.assertEqual(b, content)
+
+    def test_insert_wrong_type(self):
+        """Does insert work when the type is incorrect?"""
+
+        b = gapbuffer("i")
+        with self.assertRaises(TypeError):
+            b.insert(0, [])
+
+    def test_insert_out_of_bounds(self):
+        """Does insert work when the index is out-of-bounds?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        b.insert(len(b) * 2, 9)
+        content.insert(len(content) * 2, 9)
+
+        self.assertEqual(b, content)
+
+    def test_insert_negative(self):
+        """Does insert work when the index is negative?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        b.insert(-2, 9)
+        content.insert(-2, 9)
+
+        self.assertEqual(b, content)
+
+    def test_insert_negative_out_of_bounds(self):
+        """Does insert work when the index is negative and out-of-bounds?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        b.insert(-(len(b) * 2), 9)
+        content.insert(-(len(content) * 2), 9)
+
+        self.assertEqual(b, content)
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
