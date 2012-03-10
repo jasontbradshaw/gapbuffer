@@ -967,6 +967,105 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(b1, b2)
 
+    def test_pop_no_arg(self):
+        """Does pop work without an index argument?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        bp = b.pop()
+        cp = content.pop()
+
+        self.assertEqual(bp, cp)
+        self.assertEqual(b, content)
+
+    def test_pop_index_zero(self):
+        """Does pop work with the 0 index argument?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        bp = b.pop(0)
+        cp = content.pop(0)
+
+        self.assertEqual(bp, cp)
+        self.assertEqual(b, content)
+
+    def test_pop_index_negone(self):
+        """Does pop work with the -1 index argument?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        bp = b.pop(-1)
+        cp = content.pop(-1)
+
+        self.assertEqual(bp, cp)
+        self.assertEqual(b, content)
+
+    def test_pop_index_negone(self):
+        """Does pop work with a negative index argument?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        bp = b.pop(-3)
+        cp = content.pop(-3)
+
+        self.assertEqual(bp, cp)
+        self.assertEqual(b, content)
+
+    def test_pop_index_non_zero(self):
+        """Does pop work with a non-zero index argument?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        bp = b.pop(3)
+        cp = content.pop(3)
+
+        self.assertEqual(bp, cp)
+        self.assertEqual(b, content)
+
+    def test_pop_default(self):
+        """Does the no-arg pop work the same as pop with a -1 index argument?"""
+
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4])
+        b2 = gapbuffer("i", b1)
+
+        bp1 = b1.pop(-1)
+        bp2 = b2.pop()
+
+        self.assertEqual(bp1, bp2)
+        self.assertEqual(b1, b2)
+
+    def test_pop_index_out_of_bounds(self):
+        """Does pop work with an out-of-bounds index?"""
+
+        b = gapbuffer("i", [0, 1, 2, 3, 4])
+        with self.assertRaises(IndexError):
+            b.pop(len(b) + 1)
+
+    def test_pop_index_negative_out_of_bounds(self):
+        """Does pop work with a negative out-of-bounds index?"""
+
+        b = gapbuffer("i", [0, 1, 2, 3, 4])
+        with self.assertRaises(IndexError):
+            b.pop(-(len(b) + 1))
+
+    def test_pop_congruency(self):
+        """Is pop congruent to saving an index, then deleting it?"""
+
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4])
+        b2 = gapbuffer("i", b1)
+
+        bp1 = b1.pop(1)
+        bp2 = b2[1]
+        del bp2[1]
+
+        self.assertEqual(bp1, bp2)
+        self.assertEqual(b1, b2)
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
