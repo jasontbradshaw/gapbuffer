@@ -780,6 +780,50 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(content.count([]), b.count([]))
 
+    def test_index(self):
+        """Does indexing items work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(2), b.index(2))
+
+    def test_index_empty(self):
+        """Does indexing items when the buffer is empty work?"""
+
+        b = gapbuffer("i")
+
+        with self.assertRaises(ValueError):
+            b.index(0)
+
+    def test_index_not_present(self):
+        """Does indexing items when they aren't present work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        with self.assertRaises(ValueError):
+            b.index(9)
+
+    def test_index_wrong_type_not_present(self):
+        """Does indexing items when they aren't present and are of the incorrect
+        type work?
+        """
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        with self.assertRaises(ValueError):
+            b.index([])
+
+    def test_index_multiple(self):
+        """Does indexing items where there are duplicates work?"""
+
+        content = [0, 1, 2, 3, 3, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(3), b.index(3))
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
