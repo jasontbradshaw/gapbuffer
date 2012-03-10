@@ -824,6 +824,66 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(content.index(3), b.index(3))
 
+    def test_index_negative(self):
+        """Does negative-indexing items work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(-2), b.index(-2))
+
+    def test_index_negative_out_of_bounds(self):
+        """Does negative-indexing items that are out-of-bounds work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(-(len(content) * 2)),
+                b.index(-(len(b) * 2)))
+
+    def test_index_start_range(self):
+        """Does indexing with a starting index work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(3, 2), b.index(3, 2))
+
+    def test_index_start_range_negative(self):
+        """Does indexing with a starting index work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(3, -3), b.index(3, -3))
+
+    def test_index_end_range(self):
+        """Does indexing with a starting and ending index work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(3, 2, 4), b.index(3, 2, 4))
+
+    def test_index_end_range_negative(self):
+        """Does indexing with a starting and negative ending index work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(3, 2, -2), b.index(3, 2, -2))
+
+    def test_index_end_range_negative_out_of_bounds(self):
+        """Does indexing with a starting and negative, out-of-bounds ending
+        index work?
+        """
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(0, 0, -(len(content) * 2)),
+                b.index(0, 0, -(len(b) * 2)))
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
