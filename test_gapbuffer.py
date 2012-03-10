@@ -1176,8 +1176,7 @@ class TestGapBuffer(unittest.TestCase):
 
         b2.reverse()
 
-        for b1_item, b2_item in zip(reversed(b1), b2):
-            self.assertEqual(b1_item, b2_item)
+        self.assertEqual(reversed(b1), b2)
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
