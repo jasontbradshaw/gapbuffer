@@ -334,6 +334,16 @@ class TestGapBuffer(unittest.TestCase):
                 b[index] = item
                 self.assertEqual(item, b[index])
 
+    def test_set_index_wrong_type(self):
+        """Does setting an item at some index work?"""
+
+        for typecode in self.valid_content:
+            content = self.valid_content[typecode]
+            b = gapbuffer(typecode, content)
+
+            with self.assertRaises(TypeError):
+                b[0] = []
+
     def test_set_index_negative(self):
         """Does setting an item at a negative index work?"""
 
