@@ -414,7 +414,7 @@ class TestGapBuffer(unittest.TestCase):
             for index, item in enumerate(reversed(content)):
                 b[-(index + 1)] = item
 
-            self.assertEqual(reversed(content), b)
+            self.assertEqual([i for i in reversed(content)], b)
 
     def test_set_index_out_of_bounds(self):
         """Does setting an out-of-bounds index work?"""
