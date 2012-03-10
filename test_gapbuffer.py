@@ -1109,6 +1109,76 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(b1, b2)
 
+    def test_reverse(self):
+        """Does in-place reverse work?"""
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b.reverse()
+        content.reverse()
+
+        self.assertEqual(b, content)
+
+    def test_reverse_empty(self):
+        """Does in-place reverse work when the buffer is empty?"""
+
+        content = []
+        b = gapbuffer("i", content)
+
+        b.reverse()
+        content.reverse()
+
+        self.assertEqual(b, content)
+
+    def test_reverse_single_item(self):
+        """Does in-place reverse work when the buffer has only one item?"""
+
+        content = [0]
+        b = gapbuffer("i", content)
+
+        b.reverse()
+        content.reverse()
+
+        self.assertEqual(b, content)
+
+    def test_reverse_even_items(self):
+        """Does in-place reverse work when the buffer has an even number of
+        items?
+        """
+
+        content = [0, 1, 2, 3]
+        b = gapbuffer("i", content)
+
+        b.reverse()
+        content.reverse()
+
+        self.assertEqual(b, content)
+
+    def test_reverse_odd_items(self):
+        """Does in-place reverse work when the buffer has an odd number of
+        items?
+        """
+
+        content = [0, 1, 2]
+        b = gapbuffer("i", content)
+
+        b.reverse()
+        content.reverse()
+
+        self.assertEqual(b, content)
+
+    def test_reverse_congruency(self):
+        """Does reversing yield the same sequence as the reverse iterator?"""
+
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4])
+        b2 = gapbuffer("i", b1)
+
+        b2.reverse()
+
+        for b1_item, b2_item in zip(reversed(b1), b2):
+            self.assertEqual(b1_item, b2_item)
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
