@@ -3,48 +3,48 @@
 import unittest
 from gapbuffer import gapbuffer
 
+# correct content for each typecode
+VALID_CONTENT = {
+    "c": str("abc"),
+    "b": [0, 1, 2],
+    "B": [0, 1, 2],
+    "u": unicode("abc"),
+    "h": [0, 1, 2],
+    "H": [0, 1, 2],
+    "i": [0, 1, 2],
+    "I": [0L, 1L, 2L],
+    "l": [0L, 1L, 2L],
+    "L": [0L, 1L, 2L],
+    "f": [0.0, 1.0, 2.0],
+    "d": [0.0, 1.0, 2.0]
+}
+
 class TestGapBuffer(unittest.TestCase):
-    def setUp(self):
-        # correct content for each typecode
-        self.valid_content = {
-            "c": str("abc"),
-            "b": [0, 1, 2],
-            "B": [0, 1, 2],
-            "u": unicode("abc"),
-            "h": [0, 1, 2],
-            "H": [0, 1, 2],
-            "i": [0, 1, 2],
-            "I": [0L, 1L, 2L],
-            "l": [0L, 1L, 2L],
-            "L": [0L, 1L, 2L],
-            "f": [0.0, 1.0, 2.0],
-            "d": [0.0, 1.0, 2.0]
-        }
 
     def test_init_empty(self):
         """Can we init for every typecode without exceptions?"""
 
-        for typecode in self.valid_content:
+        for typecode in VALID_CONTENT:
             gapbuffer(typecode)
 
     def test_init_content(self):
         """Can we init for every typecode with valid initial content?"""
 
-        for typecode in self.valid_content:
-            gapbuffer(typecode, self.valid_content[typecode])
+        for typecode in VALID_CONTENT:
+            gapbuffer(typecode, VALID_CONTENT[typecode])
 
     def test_init_content_generator(self):
         """Can we init for every typecode with valid initial content generator?
         """
 
-        for typecode in self.valid_content:
+        for typecode in VALID_CONTENT:
             gapbuffer(typecode,
-                    (i for i in self.valid_content[typecode]))
+                    (i for i in VALID_CONTENT[typecode]))
 
     def test_init_content_empty(self):
         """Can we init for every typecode with zero-length initial content?"""
 
-        for typecode in self.valid_content:
+        for typecode in VALID_CONTENT:
             b = gapbuffer(typecode, [])
             self.assertEqual(len(b), 0)
 
@@ -53,7 +53,7 @@ class TestGapBuffer(unittest.TestCase):
         generator?
         """
 
-        for typecode in self.valid_content:
+        for typecode in VALID_CONTENT:
             gapbuffer(typecode, (i for i in []))
 
     def test_init_char_content_wrong_type(self):
@@ -62,10 +62,10 @@ class TestGapBuffer(unittest.TestCase):
         """
 
         # all types but str are invalid for 'c'
-        for typecode in self.valid_content:
+        for typecode in VALID_CONTENT:
             if typecode != "c":
                 with self.assertRaises(TypeError):
-                    gapbuffer("c", self.valid_content[typecode])
+                    gapbuffer("c", VALID_CONTENT[typecode])
 
     def test_init_unicode_content_wrong_type(self):
         """Does giving 'u' typecode buffers incorrect types raise the correct
@@ -73,31 +73,31 @@ class TestGapBuffer(unittest.TestCase):
         """
 
         # all types but unicode are invalid for 'u'
-        for typecode in self.valid_content:
+        for typecode in VALID_CONTENT:
             if typecode != "u":
                 with self.assertRaises(TypeError):
-                    gapbuffer("u", self.valid_content[typecode])
+                    gapbuffer("u", VALID_CONTENT[typecode])
 
     def test_eq(self):
         """Test all typecodes for equality to their respective initial content.
         """
 
-        for typecode in self.valid_content:
-            b = gapbuffer(typecode, self.valid_content[typecode])
-            self.assertEqual(self.valid_content[typecode], b)
+        for typecode in VALID_CONTENT:
+            b = gapbuffer(typecode, VALID_CONTENT[typecode])
+            self.assertEqual(VALID_CONTENT[typecode], b)
 
     def test_eq_different_lengths(self):
         """Test all typecodes for inequality to similar, different-length
         content.
         """
 
-        for typecode in self.valid_content:
-            b = gapbuffer(typecode, self.valid_content[typecode])
-            self.assertNotEqual(self.valid_content[typecode] * 2, b)
+        for typecode in VALID_CONTENT:
+            b = gapbuffer(typecode, VALID_CONTENT[typecode])
+            self.assertNotEqual(VALID_CONTENT[typecode] * 2, b)
 
-        for typecode in self.valid_content:
-            b = gapbuffer(typecode, self.valid_content[typecode][:2])
-            self.assertNotEqual(self.valid_content[typecode], b)
+        for typecode in VALID_CONTENT:
+            b = gapbuffer(typecode, VALID_CONTENT[typecode][:2])
+            self.assertNotEqual(VALID_CONTENT[typecode], b)
 
     def test_in_nonstring(self):
         """Do non string-based buffers contain items that are in them?"""
@@ -197,8 +197,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_add(self):
         """Does concatenating like-typed buffers work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             self.assertEqual(b + b, content + content)
@@ -206,8 +206,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_add_non_gapbuffer(self):
         """Does concatenating non-gapbuffers work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             self.assertEqual(b + content, content + content)
@@ -215,8 +215,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_multiply(self):
         """Does multiplying gapbuffers work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             self.assertEqual(b * 0, [])
@@ -261,8 +261,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_index(self):
         """Does getting the index of an item in a gapbuffer work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             self.assertEqual(b.index(content[0]), 0)
@@ -274,8 +274,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_count(self):
         """Does getting the index of an item in a gapbuffer work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             self.assertEqual(1, b.count(content[0]))
@@ -286,8 +286,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_get_index(self):
         """Does getting an item at some index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             for i in xrange(len(content)):
@@ -296,8 +296,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_get_index_negative(self):
         """Does getting an item at a negative index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             for i in xrange(1, len(content) + 1):
@@ -306,8 +306,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_get_index_out_of_bounds(self):
         """Does getting an out-of-bounds index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             with self.assertRaises(IndexError):
@@ -316,8 +316,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_get_index_negative_out_of_bounds(self):
         """Does getting a negative out-of-bounds index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             with self.assertRaises(IndexError):
@@ -326,8 +326,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_set_index(self):
         """Does setting an item at some index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             for index, item in enumerate(reversed(content)):
@@ -337,8 +337,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_set_index_wrong_type(self):
         """Does setting an item at some index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             with self.assertRaises(TypeError):
@@ -347,8 +347,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_set_index_negative(self):
         """Does setting an item at a negative index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             for index, item in enumerate(reversed(content)):
@@ -359,8 +359,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_set_index_out_of_bounds(self):
         """Does setting an out-of-bounds index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             with self.assertRaises(IndexError):
@@ -369,8 +369,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_set_index_negative_out_of_bounds(self):
         """Does setting a negative out-of-bounds index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             with self.assertRaises(IndexError):
@@ -379,8 +379,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_del_index(self):
         """Does deleting an index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             del b[0]
@@ -389,8 +389,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_del_index_negative(self):
         """Does deleting a negative index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             del b[-1]
@@ -399,8 +399,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_del_index_out_of_bounds(self):
         """Does deleting an out-of-bounds index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             # can't delete out-of-bounds index
@@ -410,8 +410,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_del_index_negative_out_of_bounds(self):
         """Does deleting a negative out-of-bounds index work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             # can't delete out-of-bounds index
@@ -421,8 +421,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_get_slice(self):
         """Does getting a slice work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             self.assertEqual(b[:], content[:])
@@ -433,8 +433,8 @@ class TestGapBuffer(unittest.TestCase):
     def test_get_slice_extended(self):
         """Does getting an extended slice work?"""
 
-        for typecode in self.valid_content:
-            content = self.valid_content[typecode]
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
             self.assertEqual(b[::], content[::])
