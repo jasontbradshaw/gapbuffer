@@ -258,7 +258,7 @@ class gapbuffer(object):
             for i in xrange(len(self) / 2):
                 self[-(i + 1)], self[i] = self[i], self[-(i + 1)]
 
-    def sort(self, comparator=None, key=None, reverse=False):
+    def sort(self, cmp=None, key=None, reverse=False):
         """Sort the items of this gapbuffer in-place."""
         raise NotImplementedError()
 
