@@ -1066,6 +1066,49 @@ class TestGapBuffer(unittest.TestCase):
         self.assertEqual(bp1, bp2)
         self.assertEqual(b1, b2)
 
+    def test_remove(self):
+        """Does remove work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        b.remove(3)
+        content.remove(3)
+
+        self.assertEqual(b, content)
+
+    def test_remove_multiple_items_only_first(self):
+        """Does remove only remove the first item when there are duplicates?"""
+
+        content = [0, 1, 2, 3, 4, 3]
+        b = gapbuffer("i", content)
+
+        b.remove(3)
+        content.remove(3)
+
+        self.assertEqual(b[-1], 3)
+        self.assertEqual(content[-1], 3)
+
+        self.assertEqual(b, content)
+
+    def test_remove_not_present(self):
+        """Does remove work when the item isn't present?"""
+
+        b = gapbuffer("i", [0, 1, 2, 3, 4])
+        with self.assertRaises(ValueError):
+            b.remove(9)
+
+    def test_remove_congruency(self):
+        """Is remove congruent to deleting an item found by index?"""
+
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4])
+        b2 = gapbuffer("i", b1)
+
+        b1.remove(2)
+        del b2[b2.index(2)]
+
+        self.assertEqual(b1, b2)
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
