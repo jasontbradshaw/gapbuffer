@@ -956,6 +956,17 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(b, content)
 
+    def test_insert_congruency(self):
+        """Is insert congruent to setting a zero-length slice?"""
+
+        b1 = gapbuffer("i", [0, 1, 2, 3, 4])
+        b2 = gapbuffer("i", b1)
+
+        b1.insert(0, 9)
+        b2[0:0] = [9]
+
+        self.assertEqual(b1, b2)
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
