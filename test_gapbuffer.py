@@ -99,6 +99,66 @@ class TestGapBuffer(unittest.TestCase):
             b = gapbuffer(typecode, VALID_CONTENT[typecode][:2])
             self.assertNotEqual(VALID_CONTENT[typecode], b)
 
+    def test_lt(self):
+        """Does comparing buffers with '<' work?"""
+
+        s1 = "abc"
+        s2 = "acd"
+
+        b1 = gapbuffer("c", s1)
+        b2 = gapbuffer("c", s2)
+
+        self.assertTrue(s1 < s2 and b1 < b2)
+
+    def test_le(self):
+        """Does comparing buffers with '<=' work?"""
+
+        s1 = "abc"
+        s2 = "acd"
+
+        b1 = gapbuffer("c", s1)
+        b2 = gapbuffer("c", s2)
+
+        self.assertTrue(s1 < s2 and b1 < b2)
+
+        s1 = "abc"
+        s2 = s1
+
+        b1 = gapbuffer("c", s1)
+        b2 = gapbuffer("c", s2)
+
+        self.assertTrue(s1 <= s2 and b1 <= b2)
+
+    def test_gt(self):
+        """Does comparing buffers with '>' work?"""
+
+        s1 = "abc"
+        s2 = "acd"
+
+        b1 = gapbuffer("c", s1)
+        b2 = gapbuffer("c", s2)
+
+        self.assertTrue(s2 > s1 and b2 > b1)
+
+    def test_ge(self):
+        """Does comparing buffers with '>=' work?"""
+
+        s1 = "abc"
+        s2 = "acd"
+
+        b1 = gapbuffer("c", s1)
+        b2 = gapbuffer("c", s2)
+
+        self.assertTrue(s2 >= s1 and b2 >= b1)
+
+        s1 = "abc"
+        s2 = s1
+
+        b1 = gapbuffer("c", s1)
+        b2 = gapbuffer("c", s2)
+
+        self.assertTrue(s2 >= s1 and b2 >= b1)
+
     def test_in_nonstring(self):
         """Do non string-based buffers contain items that are in them?"""
 
