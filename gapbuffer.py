@@ -79,6 +79,10 @@ class gapbuffer(object):
         other.
         """
 
+        # NOTE: we don't just defing __cmp__ because we want the len()
+        # optimization the __eq__ method does. if we try to define both __cmp__
+        # and the other ordering methods, infinite recursion results.
+
         # fill value guaranteed to be unique to this fun. call and inaccessible
         fillvalue = lambda: None
         for i, (si, oi) in enumerate(itertools.izip_longest(self, other,
