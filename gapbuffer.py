@@ -74,6 +74,10 @@ class gapbuffer(object):
     def __eq__(self, other):
         """Determine whether this is item-equivalent to another iterable."""
 
+        # optimize for iterables that the len() method works on
+        if hasattr(other, "__len__") and len(other) != len(self):
+            return False
+
         other_len = 0
         for index, other_item in enumerate(other):
             # if the other item is longer or our own iteration is over...
