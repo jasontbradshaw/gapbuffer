@@ -89,9 +89,9 @@ class TestGapBuffer(unittest.TestCase):
     def test_eq_infinite_other(self):
         """Test whether comparison correctly handles infinite iterables."""
 
-        b = gapbuffer("i", [0, 1, 2, 3, 4])
+        b = gapbuffer("i", [9, 9, 9, 9, 9])
 
-        # an infinite generator
+        # an infinite generator that's identical (besides length) to our buffer
         def g():
             while 1:
                 yield 9
