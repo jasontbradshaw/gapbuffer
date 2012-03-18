@@ -86,6 +86,18 @@ class TestGapBuffer(unittest.TestCase):
             b = gapbuffer(typecode, VALID_CONTENT[typecode])
             self.assertEqual(VALID_CONTENT[typecode], b)
 
+    def test_eq_infinite_other(self):
+        """Test whether comparison correctly handles infinite iterables."""
+
+        b = gapbuffer("i", [0, 1, 2, 3, 4])
+
+        # an infinite generator
+        def g():
+            while 1:
+                yield 9
+
+        self.assertFalse(b == g())
+
     def test_eq_different_lengths(self):
         """Test all typecodes for inequality to similar, different-length
         content.
