@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import array
+import itertools
 
 class gapbuffer(object):
     """
@@ -71,6 +72,38 @@ class gapbuffer(object):
         """Get the length of the buffer."""
         return self.__content_end - self.__gap_len
 
+    def __compare(self, other):
+        """
+        Does a lexicographic comparison with another other iterable, and returns
+        -1, 0, or 1 if the buffer is less than, equal to, or greater than the
+        other.
+        """
+
+        # fill value guaranteed to be unique to this fun. call and inaccessible
+        fillvalue = lambda: None
+        for i, (si, oi) in enumerate(itertools.izip_longest(self, other,
+                fillvalue=fillvalue)):
+            # we're shorter than the other iterable and aren't different
+            if si is fillvalue:
+                return -1
+
+            # the other is shorter than us and not different
+            if oi is fillvalue:
+                return 1
+
+            # we're smaller than the other, or the other is larger
+            if oi > si:
+                return -1
+            elif oi < si:
+                return 1
+
+            # guard against infinite iterable comparisons
+            if i >= len(self):
+                return -1
+
+        # we're equal if none of the cases passed (same length, not different)
+        return 0
+
     def __eq__(self, other):
         """Determine whether this is item-equivalent to another iterable."""
 
@@ -78,23 +111,37 @@ class gapbuffer(object):
         if hasattr(other, "__len__") and len(other) != len(self):
             return False
 
-        other_len = 0
-        for index, other_item in enumerate(other):
-            # if the other item is longer or our own iteration is over...
-            if index >= len(self) or self[index] != other_item:
-                return False
+        return self.__compare(other) == 0
 
-            other_len += 1
+    def __lt__(self, other):
+        """Determine whether this is less-than another iterable."""
+        return self.__compare(other) < 0
 
-        return other_len == len(self)
+    def __le__(self, other):
+        """Determine whether this is less-than or equal-to another iterable."""
+        return self.__compare(other) <= 0
+
+    def __gt__(self, other):
+        """Determine whether this is greather-than another iterable."""
+        return self.__compare(other) > 0
+
+    def __ge__(self, other):
+        """
+        Determine whether this is greater-than or equal-to another iterable.
+        """
+        return self.__compare(other) >= 0
 
     def __contains__(self, item):
-        """Return True if the given item is in us, False otherwise."""
+        """
+        Return True if the given item is contained in the buffer, False
+        otherwise.
+        """
 
-        raise NotImplementedError()
+        # TODO: implement substring test for character and unicode buffers
+        if self.__buf.typecode in ["u", "c"]:
+            raise NotImplementedError()
 
-        # TODO: implement substring test for str and unicode buffers
-
+        # general test for membership
         for self_item in self:
             if item == self_item:
                 return True
