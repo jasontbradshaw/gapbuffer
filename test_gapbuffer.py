@@ -219,6 +219,7 @@ class TestGapBuffer(unittest.TestCase):
         b = gapbuffer("c", s)
 
         self.assertTrue("h" in b)
+        self.assertTrue(u"h" in b)
         self.assertTrue("hello" in b)
         self.assertTrue(u"hello" in b)
         self.assertTrue("foo" not in b)
@@ -227,6 +228,7 @@ class TestGapBuffer(unittest.TestCase):
         bu = gapbuffer("u", u)
 
         self.assertTrue(u"h" in bu)
+        self.assertTrue("h" in bu)
         self.assertTrue(u"hello" in bu)
         self.assertTrue("hello" in bu)
         self.assertTrue(u"foo" not in bu)
