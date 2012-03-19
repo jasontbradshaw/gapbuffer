@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import array
 from itertools import izip_longest
+import re
 
 class gapbuffer(object):
     """
@@ -124,10 +125,33 @@ class gapbuffer(object):
         """
 
         # TODO: implement substring test for character and unicode buffers
-        if self.__buf.typecode in ["u", "c"]:
-            raise NotImplementedError()
+        if self.__buf.typecode in ["u", "c"] and len(value) > 1:
+            # optimize for finding an empty string or a non-string
+            if not isinstance(value, basestring) or len(value) == 0:
+                return False
 
-        # general test for membership
+            # store the gap size for later
+            gap_len = self.__gap_len
+
+            # move the gap to the end of the buffer
+            # TODO: move gap to end OR beginning, depending on which is closest
+            self.__move_gap(len(self))
+
+            # remove the gap. this should just be a pointer update in the C code
+            for i in xrange(gap_len):
+                self.__buf.pop(len(self))
+
+            # get the result, replace the gap, then return the stored result
+            result = re.search(re.escape(value), self.__buf) is not None
+
+            # TODO: if moving the gap to end OR beginning, put gap on that side
+            for i in xrange(gap_len):
+                item = gapbuffer.TYPE_INFO[self.__buf.typecode][0]
+                self.__buf.extend(item for i in xrange(gap_len))
+
+            return result
+
+        # general test for membership, including single-character string values
         for item in self:
             if value == item:
                 return True
