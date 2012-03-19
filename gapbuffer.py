@@ -150,11 +150,9 @@ class gapbuffer(object):
         multiplied = gapbuffer(self.__buf.typecode)
 
         # don't concatenate if 0 or less was specified
-        if n <= 0:
-            return multiplied
-
-        for i in xrange(n):
-            multiplied.extend(self)
+        if n > 0:
+            for i in xrange(n):
+                multiplied.extend(self)
 
         return multiplied
 
