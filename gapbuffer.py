@@ -420,8 +420,8 @@ class gapbuffer(object):
         # NOTE: we do this separately from the unicode version to prevent weird
         # str/unicode conversions.
 
-        # do more compact represenstations for string and unicode types
-        if isinstance(self[0], basestring):
+        # do more compact representations for string and unicode types
+        if self.__buf.typecode in ["u", "c"]:
             return ''.join(c for c in self)
 
         # turn all other types into a simple list
@@ -430,11 +430,9 @@ class gapbuffer(object):
     def __unicode__(self):
         """Return the unicode representation of the buffer's contents."""
 
-        # do more compact represenstations for string and unicode types
-        if isinstance(self[0], basestring):
+        if self.__buf.typecode in ["u", "c"]:
             return u''.join(c for c in self)
 
-        # turn all other types into a simple list
         return unicode(repr([i for i in self]))
 
     def __repr__(self):
@@ -446,9 +444,9 @@ class gapbuffer(object):
             s += u", "
 
             # do more compact represenstations for string and unicode types
-            if isinstance(self[0], str):
+            if self.__buf.typecode == "c":
                 s += repr(''.join(c for c in self))
-            elif isinstance(self[0], unicode):
+            elif self.__buf.typecode == "u":
                 s += repr(u''.join(c for c in self))
             else:
                 # turn all other types into a simple list
