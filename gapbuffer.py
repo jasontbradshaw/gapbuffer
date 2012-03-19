@@ -260,7 +260,7 @@ class gapbuffer(object):
         # put the gap at the beginning of the buffer
         self.__move_gap(0)
 
-        # (try to) add the other iterable to the end of the existing buffer
+        # append the other iterable's items to the end of the existing buffer
         self.__buf.extend(other)
 
     def insert(self, index, item):
