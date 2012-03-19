@@ -4,9 +4,10 @@ from itertools import izip_longest
 
 class gapbuffer(object):
     """
-    Represents a sequence of identically-typed items using a gap buffer. Can be
-    initialized with any iterable item, as long as the items in the iterable are
-    all of the same type. Uses an array.array internally to store data.
+    Represents a sequence of identically-typed primitive items using a gap
+    buffer. Can be initialized with any iterable item, as long as the items in
+    the iterable are all of the same type. Uses an array.array internally to
+    store data.
     """
 
     # type information for the different types our internal array can take on.
