@@ -168,7 +168,7 @@ class gapbuffer(object):
     def __mul__(self, n):
         """
         Concatenate ourself to ourself some number of times and return the
-        result.
+        result as a new buffer.
         """
 
         multiplied = gapbuffer(self.__buf.typecode)
