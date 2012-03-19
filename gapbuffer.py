@@ -79,10 +79,6 @@ class gapbuffer(object):
         other.
         """
 
-        # NOTE: we don't just defing __cmp__ because we want the len()
-        # optimization the __eq__ method does. if we try to define both __cmp__
-        # and the other ordering methods, infinite recursion results.
-
         # fill value guaranteed to be unique to this fun. call and inaccessible
         fillvalue = lambda: None
         for i, (si, oi) in enumerate(itertools.izip_longest(self, other,
@@ -117,23 +113,9 @@ class gapbuffer(object):
 
         return self.__compare(other) == 0
 
-    def __lt__(self, other):
-        """Determine whether this is less-than another iterable."""
-        return self.__compare(other) < 0
-
-    def __le__(self, other):
-        """Determine whether this is less-than or equal-to another iterable."""
-        return self.__compare(other) <= 0
-
-    def __gt__(self, other):
-        """Determine whether this is greather-than another iterable."""
-        return self.__compare(other) > 0
-
-    def __ge__(self, other):
-        """
-        Determine whether this is greater-than or equal-to another iterable.
-        """
-        return self.__compare(other) >= 0
+    def __cmp__(self, other):
+        """Lexicographically compares this with another iterable."""
+        return self.__compare(other)
 
     def __contains__(self, item):
         """
