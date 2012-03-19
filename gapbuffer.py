@@ -116,7 +116,7 @@ class gapbuffer(object):
         """Lexicographically compares this with another iterable."""
         return self.__compare(other)
 
-    def __contains__(self, item):
+    def __contains__(self, value):
         """
         Return True if the given item is contained in the buffer, False
         otherwise.
@@ -127,8 +127,8 @@ class gapbuffer(object):
             raise NotImplementedError()
 
         # general test for membership
-        for self_item in self:
-            if item == self_item:
+        for item in self:
+            if value == item:
                 return True
 
         return False
