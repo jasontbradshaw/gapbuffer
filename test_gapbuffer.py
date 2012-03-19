@@ -280,7 +280,27 @@ class TestGapBuffer(unittest.TestCase):
 
             self.assertEqual(b + content, content + content)
 
-    def test_multiply(self):
+    def test_iadd(self):
+        """Does concatenating like-typed buffers incrementally work?"""
+
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
+            b = gapbuffer(typecode, content)
+            b += b
+
+            self.assertEqual(b, content + content)
+
+    def test_iadd_non_gapbuffer(self):
+        """Does concatenating non-gapbuffers incrementally work?"""
+
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
+            b = gapbuffer(typecode, content)
+            b += content
+
+            self.assertEqual(b, content + content)
+
+    def test_mul(self):
         """Does multiplying gapbuffers work?"""
 
         for typecode in VALID_CONTENT:
@@ -291,9 +311,27 @@ class TestGapBuffer(unittest.TestCase):
             self.assertEqual(b * 1, content)
             self.assertEqual(b * 2, content * 2)
 
-            self.assertEqual(1 * b, content)
             self.assertEqual(0 * b, [])
+            self.assertEqual(1 * b, content)
             self.assertEqual(2 * b, content * 2)
+
+    def test_imul(self):
+        """Does multiplying gapbuffers incrementally work?"""
+
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
+
+            b = gapbuffer(typecode, content)
+            b *= 0
+            self.assertEqual(b, [])
+
+            b = gapbuffer(typecode, content)
+            b *= 1
+            self.assertEqual(b, content)
+
+            b = gapbuffer(typecode, content)
+            b *= 2
+            self.assertEqual(b, content * 2)
 
     def test_len(self):
         """Does getting the length of a gapbuffer work?"""

@@ -168,6 +168,10 @@ class gapbuffer(object):
 
         return added
 
+    def __iadd__(self, other):
+        """Concatenate the other iterable to this one in-place."""
+        self.extend(other)
+
     def __mul__(self, n):
         """
         Concatenate ourself to ourself some number of times and return the
@@ -182,6 +186,17 @@ class gapbuffer(object):
                 multiplied.extend(self)
 
         return multiplied
+
+    def __imul__(self, n):
+        """Concatenate ourself to ourself some number of times in-place."""
+
+        # clear the buffer if 0 or less was specified
+        if n <= 0:
+            # completely rebuild this buffer
+            self.__init__(self.__buf.typecode, min_gap_size=self.__min_gap_size)
+        else:
+            for i in xrange(n):
+                self.extend(self)
 
     def __getitem__(self, x):
         """Get the item or slice at the given index."""
