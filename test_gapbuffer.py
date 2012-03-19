@@ -215,25 +215,17 @@ class TestGapBuffer(unittest.TestCase):
     def test_in_string(self):
         """Do string-based buffers contain other string sequences?"""
 
-        s = "hello, world!"
-        b = gapbuffer("c", s)
-
-        self.assertTrue("h" in b)
-        self.assertTrue(u"h" in b)
-        self.assertTrue("hello" in b)
-        self.assertTrue(u"hello" in b)
-        self.assertTrue("foo" not in b)
-        self.assertTrue(["f", "o", "o"] not in b)
-
-        u = u"hello, world!"
-        bu = gapbuffer("u", u)
-
-        self.assertTrue(u"h" in bu)
-        self.assertTrue("h" in bu)
-        self.assertTrue(u"hello" in bu)
-        self.assertTrue("hello" in bu)
-        self.assertTrue(u"foo" not in bu)
-        self.assertTrue([u"f", u"o", u"o"] not in b)
+        bc = gapbuffer("c", "hello, world!")
+        bu = gapbuffer("u", u"hello, world!")
+        for b in [bc, bu]:
+            self.assertTrue("h" in b)
+            self.assertTrue(u"h" in b)
+            self.assertTrue("hello" in b)
+            self.assertTrue(u"hello" in b)
+            self.assertTrue("foo" not in b)
+            self.assertTrue(u"foo" not in b)
+            self.assertTrue(["f", "o", "o"] not in b)
+            self.assertTrue([u"f", u"o", u"o"] not in b)
 
     def test_in_string_added(self):
         """Do string-based buffers contain sequences that are added to them?"""
