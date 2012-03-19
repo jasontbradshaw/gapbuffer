@@ -125,9 +125,10 @@ class gapbuffer(object):
         """
 
         # substring test for character and unicode buffers
-        if self.__buf.typecode in ["u", "c"] and len(value) > 1:
-            # optimize for finding an empty string or a non-string
-            if not isinstance(value, basestring) or len(value) == 0:
+        if (self.__buf.typecode in ["u", "c"] and isinstance(value, basestring)
+                and len(value) > 1):
+            # prevent re from finding weird things if given an empty string
+            if len(value) == 0:
                 return False
 
             # store the gap size for later
