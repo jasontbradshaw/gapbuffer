@@ -42,7 +42,7 @@ class Buffer(object):
     @property
     def cursor(self):
         """Get the current position of the cursor."""
-        # account for the cursor having it's position deleted
+        # account for the cursor having its position deleted
         return min(self.__cursor, len(self))
 
     @cursor.setter
