@@ -158,7 +158,10 @@ class gapbuffer(object):
         return False
 
     def __add__(self, other):
-        """Concatenate the other iterable to this one and return the result."""
+        """
+        Concatenate the other iterable to this one and return the result as a
+        new buffer.
+        """
 
         added = gapbuffer(self.__buf.typecode, self)
         added.extend(other)
