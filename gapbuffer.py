@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import array
-import itertools
+from itertools import izip_longest
 
 class gapbuffer(object):
     """
@@ -80,15 +80,14 @@ class gapbuffer(object):
         """
 
         # fill value guaranteed to be unique to this fun. call and inaccessible
-        fillvalue = lambda: None
-        for i, (si, oi) in enumerate(itertools.izip_longest(self, other,
-                fillvalue=fillvalue)):
+        fv = lambda: None
+        for i, (si, oi) in enumerate(izip_longest(self, other, fillvalue=fv)):
             # we're shorter than the other iterable and aren't different
-            if si is fillvalue:
+            if si is fv:
                 return -1
 
             # the other is shorter than us and not different
-            if oi is fillvalue:
+            if oi is fv:
                 return 1
 
             # we're smaller than the other, or the other is larger
