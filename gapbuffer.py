@@ -124,7 +124,7 @@ class gapbuffer(object):
         otherwise.
         """
 
-        # TODO: implement substring test for character and unicode buffers
+        # substring test for character and unicode buffers
         if self.__buf.typecode in ["u", "c"] and len(value) > 1:
             # optimize for finding an empty string or a non-string
             if not isinstance(value, basestring) or len(value) == 0:
@@ -134,7 +134,6 @@ class gapbuffer(object):
             gap_len = self.__gap_len
 
             # move the gap to the end of the buffer
-            # TODO: move gap to end OR beginning, depending on which is closest
             self.__move_gap(len(self))
 
             # remove the gap. this should just be a pointer update in the C code
@@ -144,7 +143,6 @@ class gapbuffer(object):
             # get the result, replace the gap, then return the stored result
             result = re.search(re.escape(value), self.__buf) is not None
 
-            # TODO: if moving the gap to end OR beginning, put gap on that side
             for i in xrange(gap_len):
                 item = gapbuffer.TYPE_INFO[self.__buf.typecode][0]
                 self.__buf.extend(item for i in xrange(gap_len))
