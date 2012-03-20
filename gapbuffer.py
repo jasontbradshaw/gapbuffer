@@ -413,14 +413,12 @@ class gapbuffer(object):
     def __resize_gap(self, target_size):
         """Ensure that the gap is at least as large as some target."""
 
-        # TODO: ensure buf is large enough to support new gap size
-
         if self.__gap_len < target_size:
-            # calculate size increase of the gap
+            # calculate size increase of the gap, including the min gap size
             gap_delta = target_size + self.__min_gap_size - self.__gap_len
 
             # make room for the current content and the new gap
-            self.__resize_buf(len(self) + gap_delta)
+            self.__resize_buf(len(self.__buf) + gap_delta)
 
             # shift the right content down to make room for the new gap
             for i in reversed(xrange(self.__gap_end, self.__content_end)):
