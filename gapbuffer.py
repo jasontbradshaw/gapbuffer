@@ -435,7 +435,19 @@ class gapbuffer(object):
 
         # TODO: test corner cases (0-length gap, gap to ends, etc.)
 
-        assert 0 <= index < len(self.__buf)
+        # don't move the gap if it consists of the entire internal buffer
+        if len(self) == 0:
+            return
+
+        # make sure we're within virtual buffer bounds. the start of the
+        # gap is always the same as the virtual buffer index, so we must limit
+        # it to this since its end extends to the end of the actual buffer.
+        assert 0 <= index < len(self)
+
+        # optimize for moving a zero-length gap (avoids needless copies)
+        if self.__gap_len == 0:
+            self.__gap_start = self.__gap_end = index
+            return
 
         # move the gap left as far as necessary
         while self.__gap_start > index:
