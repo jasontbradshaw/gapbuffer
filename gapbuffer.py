@@ -198,13 +198,13 @@ class gapbuffer(object):
             for i in xrange(n - 1):
                 self.extend(self)
 
-    def __getitem__(self, x):
+    def __getitem__(self, value):
         """Get the item or slice at the given index."""
 
         # handle slicing with a 'step' (normal format is handled by __getslice__)
-        if isinstance(x, slice):
-            return self.__get_slice(x)
-        return self.__get_index(x)
+        if isinstance(value, slice):
+            return self.__get_slice(value)
+        return self.__get_index(value)
 
     def __get_index(self, i):
         """Get the item at some index."""
