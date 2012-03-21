@@ -234,7 +234,7 @@ class gapbuffer(object):
     def __set_index(self, i, value):
         """Set the item at some index."""
 
-        if i >= len(self):
+        if i >= len(self) or i < -len(self):
             raise IndexError(self.__class__.__name__ + " index out of range")
 
         index = i if i < self.__gap_start else i + self.__gap_len
