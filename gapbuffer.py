@@ -195,7 +195,7 @@ class gapbuffer(object):
             # completely rebuild this buffer
             self.__init__(self.__buf.typecode, min_gap_size=self.__min_gap_size)
         else:
-            for i in xrange(n):
+            for i in xrange(n - 1):
                 self.extend(self)
 
     def __getitem__(self, x):
