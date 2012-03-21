@@ -210,7 +210,7 @@ class gapbuffer(object):
         """Get the item at some index."""
 
         # constrain index bounds
-        if i >= len(self):
+        if i >= len(self) or i < -len(self):
             raise IndexError(self.__class__.__name__ + " index out of range")
 
         # if before the gap, access buffer directly, else account for gap
