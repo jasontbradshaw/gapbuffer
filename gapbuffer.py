@@ -200,7 +200,7 @@ class gapbuffer(object):
 
     def __enforce_index(self, index):
         """Ensures the given index is valid for the current buffer size."""
-        if i >= len(self) or i < -len(self):
+        if index >= len(self) or index < -len(self):
             raise IndexError(self.__class__.__name__ + " index out of range")
 
     def __getitem__(self, x):
