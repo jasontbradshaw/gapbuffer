@@ -343,7 +343,12 @@ class gapbuffer(object):
 
     def count(self, item):
         """Return the number of times 'item' occurs in this gapbuffer."""
-        raise NotImplementedError()
+
+        result = 0
+        for self_item in self:
+            if self_item == item:
+                result += 1
+        return result
 
     def append(self, item):
         """Append the 'item' to this gapbuffer."""
