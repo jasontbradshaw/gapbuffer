@@ -470,7 +470,7 @@ class TestGapBuffer(unittest.TestCase):
             b = gapbuffer(typecode, content)
 
             with self.assertRaises(IndexError):
-                b[len(b) + 1] = item
+                b[len(b) + 1] = VALID_CONTENT[typecode][0]
 
     def test_set_index_negative_out_of_bounds(self):
         """Does setting a negative out-of-bounds index work?"""
@@ -480,7 +480,7 @@ class TestGapBuffer(unittest.TestCase):
             b = gapbuffer(typecode, content)
 
             with self.assertRaises(IndexError):
-                b[-(len(b) + 1)] = item
+                b[-(len(b) + 1)] = VALID_CONTENT[typecode][0]
 
     def test_del_index(self):
         """Does deleting an index work?"""
@@ -909,7 +909,7 @@ class TestGapBuffer(unittest.TestCase):
 
         b = gapbuffer("i")
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(IndexError):
             b.index(0)
 
     def test_index_not_present(self):
@@ -940,23 +940,6 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(content.index(3), b.index(3))
 
-    def test_index_negative(self):
-        """Does negative-indexing items work?"""
-
-        content = [0, 1, 2, 3, 4, 5]
-        b = gapbuffer("i", content)
-
-        self.assertEqual(content.index(-2), b.index(-2))
-
-    def test_index_negative_out_of_bounds(self):
-        """Does negative-indexing items that are out-of-bounds work?"""
-
-        content = [0, 1, 2, 3, 4, 5]
-        b = gapbuffer("i", content)
-
-        self.assertEqual(content.index(-(len(content) * 2)),
-                b.index(-(len(b) * 2)))
-
     def test_index_start_range(self):
         """Does indexing with a starting index work?"""
 
@@ -966,7 +949,7 @@ class TestGapBuffer(unittest.TestCase):
         self.assertEqual(content.index(3, 2), b.index(3, 2))
 
     def test_index_start_range_negative(self):
-        """Does indexing with a starting index work?"""
+        """Does indexing with a negative starting index work?"""
 
         content = [0, 1, 2, 3, 4, 5]
         b = gapbuffer("i", content)
@@ -997,8 +980,12 @@ class TestGapBuffer(unittest.TestCase):
         content = [0, 1, 2, 3, 4, 5]
         b = gapbuffer("i", content)
 
-        self.assertEqual(content.index(0, 0, -(len(content) * 2)),
-                b.index(0, 0, -(len(b) * 2)))
+        # both should fail to find the item, but not raise other errors
+        with self.assertRaises(ValueError):
+            content.index(0, 0, -(len(content) * 2))
+
+        with self.assertRaises(ValueError):
+            b.index(0, 0, -(len(b) * 2))
 
     def test_insert(self):
         """Does insert work?"""
@@ -1167,7 +1154,7 @@ class TestGapBuffer(unittest.TestCase):
 
         bp1 = b1.pop(1)
         bp2 = b2[1]
-        del bp2[1]
+        del b2[1]
 
         self.assertEqual(bp1, bp2)
         self.assertEqual(b1, b2)
