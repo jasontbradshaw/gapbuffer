@@ -198,6 +198,11 @@ class gapbuffer(object):
             for i in xrange(n - 1):
                 self.extend(self)
 
+    def __enforce_index(self, index):
+        """Ensures the given index is valid for the current buffer size."""
+        if i >= len(self) or i < -len(self):
+            raise IndexError(self.__class__.__name__ + " index out of range")
+
     def __getitem__(self, x):
         """Get the item or slice at the given index."""
 
@@ -210,8 +215,7 @@ class gapbuffer(object):
         """Get the item at some index."""
 
         # constrain index bounds
-        if i >= len(self) or i < -len(self):
-            raise IndexError(self.__class__.__name__ + " index out of range")
+        self.__enforce_index(i)
 
         # if before the gap, access buffer directly, else account for gap
         index = i if i < self.__gap_start else i + self.__gap_len
@@ -234,8 +238,7 @@ class gapbuffer(object):
     def __set_index(self, i, value):
         """Set the item at some index."""
 
-        if i >= len(self) or i < -len(self):
-            raise IndexError(self.__class__.__name__ + " index out of range")
+        self.__enforce_index(i)
 
         index = i if i < self.__gap_start else i + self.__gap_len
         self.__buf[index] = value
