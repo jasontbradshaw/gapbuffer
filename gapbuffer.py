@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import array
-from itertools import izip_longest
+from itertools import izip, izip_longest
 import re
 
 class gapbuffer(object):
@@ -243,23 +243,36 @@ class gapbuffer(object):
     def __set_slice(self, s, value):
         """Set the slice at some index."""
 
-        raise NotImplementedError()
+        # make sure we can check the length of the value sequence, consuming
+        # it if necessary.
+        values = value
+        if not hasattr(value, "__len__"):
+            values = [v for v in value]
 
-        # get shorthand values for the indices of the slice
-        stop, start, step = s.indices(len(self))
+        # handle extended slices
+        if s.step is not None and s.step != 1:
+            # get our range
+            xr = xrange(*s.indices(len(self)))
 
-        # if we can get the length of the value and get its items directly,
-        # and the value is the same size as what it's replacing, do a direct
-        # replace without moving the gap.
-        slice_len = stop - start
-        if (hasattr(value, "__len__") and hasattr(value, "__getitem__")
-                and len(value) == slice_len):
-            # do a direct replacement
-            for vi, si in enumerate(xrange(*s.indices(len(self)))):
-                self[si] = value[vi]
+            # enforce range size for extended slices
+            if len(values) != len(xr):
+                raise ValueError("attempt to assign sequence of size " +
+                        str(len(values)) + " to extended slice of size " +
+                        str(len(xr)))
+
+            # set the indices in the range to their new values
+            for i, v in izip(xr, values):
+                self[i] = v
         else:
-            for vi, si in enumerate(xrange(*s.indices(len(self)))):
-                self[si] = value[vi]
+            # move the gap to the start and ensure it's large enough
+            self.__move_gap(s.start)
+            self.__resize_gap(len(values))
+
+            # add all the data from values into the gap
+            for v in values:
+                # add the next value and bump up the gap pointer as we go
+                self.__buf[self.__gap_start] = v
+                self.__gap_start += 1
 
     def __delitem__(self, x):
         """Delete some index or slice."""
