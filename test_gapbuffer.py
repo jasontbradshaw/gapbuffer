@@ -956,6 +956,18 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(content.index(3, -3), b.index(3, -3))
 
+    def test_index_start_range_negative_not_found(self):
+        """Does indexing with a negative starting index work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        with self.assertRaises(ValueError):
+            content.index(3, -2)
+
+        with self.assertRaises(ValueError):
+            b.index(3, -2)
+
     def test_index_end_range(self):
         """Does indexing with a starting and ending index work?"""
 
@@ -965,6 +977,21 @@ class TestGapBuffer(unittest.TestCase):
         self.assertEqual(content.index(3, 2, 4), b.index(3, 2, 4))
 
     def test_index_end_range_negative(self):
+        """Does indexing with a starting and negative ending index work?"""
+
+        content = [0, 1, 2, 3, 4, 5]
+        b = gapbuffer("i", content)
+
+        self.assertEqual(content.index(3, 2, -2), b.index(3, 2, -2))
+
+        # both should fail to find the item, but not raise other errors
+        with self.assertRaises(ValueError):
+            content.index(3, 0, -4)
+
+        with self.assertRaises(ValueError):
+            b.index(3, 0, -4)
+
+    def test_index_end_range_negative_not_found(self):
         """Does indexing with a starting and negative ending index work?"""
 
         content = [0, 1, 2, 3, 4, 5]
