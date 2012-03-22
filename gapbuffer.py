@@ -286,11 +286,37 @@ class gapbuffer(object):
 
     def __del_index(self, i):
         """Delete the item at some index."""
-        raise NotImplementedError()
+
+        self.__enforce_index(i)
+
+        # move the gap to the given index
+        self.__move_gap(i)
+
+        # 'delete' the index by causing the gap to consume the index
+        self.__resize_gap(1)
+        self.__gap_end += 1
 
     def __del_slice(self, s):
         """Delete some slice."""
-        raise NotImplementedError()
+
+        # get the range we'll be manipulating
+        xr = xrange(*s.indices(len(self)))
+
+        # handle extended slices
+        if s.step is not None and s.step != 1:
+            # delete every item in the slice range
+            for i in xr:
+                del self[i]
+        else:
+            # don't do anything if there was no gap given
+            if len(xr) > 0:
+                # move the gap to the start and ensure it's large enough
+                self.__move_gap(s.start)
+                self.__resize_gap(len(xr))
+
+                # expand the gap to cover it
+                self.__resize_gap(len(xr))
+                self.__gap_end += len(xr)
 
     def index(self, item, start=0, end=None):
         """
