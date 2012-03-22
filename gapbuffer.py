@@ -325,7 +325,21 @@ class gapbuffer(object):
         the buffer). Return negative if the item was not found.
         """
 
-        raise NotImplementedError()
+        # set a default for the end
+        if end is None:
+            end = len(self)
+
+        # make sure start and end are valid
+        self.__enforce_index(start)
+        self.__enforce_index(end - 1)
+
+        # if an item matches, return its index
+        for i in xrange(start, end):
+            if self[i] == item:
+                return i
+
+        # otherwise, return failure
+        return -1
 
     def count(self, item):
         """Return the number of times 'item' occurs in this gapbuffer."""
