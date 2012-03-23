@@ -1206,6 +1206,14 @@ class TestGapBuffer(unittest.TestCase):
         with self.assertRaises(IndexError):
             b.pop(-(len(b) + 1))
 
+    def test_pop_empty(self):
+        """Does pop work on an empty buffer?"""
+
+        for typecode in VALID_CONTENT:
+            b = gapbuffer(typecode)
+            with self.assertRaises(IndexError):
+                b.pop()
+
     def test_pop_congruency(self):
         """Is pop congruent to saving an index, then deleting it?"""
 
