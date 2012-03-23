@@ -1405,6 +1405,24 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(sorted(b1), b2)
 
+    def test_str(self):
+        """Does __str__ work?"""
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
+            self.assertTrue(str(gapbuffer(typecode, content)) is not None)
+
+    def test_unicode(self):
+        """Does __unicode__ work?"""
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
+            self.assertTrue(unicode(gapbuffer(typecode, content)) is not None)
+
+    def test_repr(self):
+        """Does __repr work?"""
+        for typecode in VALID_CONTENT:
+            content = VALID_CONTENT[typecode]
+            self.assertTrue(repr(gapbuffer(typecode, content)) is not None)
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
