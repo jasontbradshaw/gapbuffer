@@ -98,10 +98,6 @@ class gapbuffer(object):
             elif oi < si:
                 return 1
 
-            # guard against infinite iterable comparisons
-            if i >= len(self):
-                return -1
-
         # we're equal if none of the cases passed (same length, not different)
         return 0
 
@@ -127,9 +123,6 @@ class gapbuffer(object):
         # substring test for character and unicode buffers
         if (self.__buf.typecode in ["u", "c"] and isinstance(value, basestring)
                 and len(value) > 1):
-            # prevent re from finding weird things if given an empty string
-            if len(value) == 0:
-                return False
 
             # store the gap size for later
             gap_len = self.__gap_len
@@ -138,8 +131,8 @@ class gapbuffer(object):
             self.__move_gap(len(self))
 
             # remove the gap. this should just be a pointer update in the C code
-            for i in xrange(gap_len):
-                self.__buf.pop(len(self))
+            for i in xrange(self.__gap_len):
+                self.__buf.pop(len(self.__buf))
 
             # get the result, replace the gap, then return the stored result
             result = re.search(re.escape(value), self.__buf) is not None
@@ -149,6 +142,11 @@ class gapbuffer(object):
                 self.__buf.extend(item for i in xrange(gap_len))
 
             return result
+
+        elif (self.__buf.typecode in ["u", "c"] and
+                isinstance(value, basestring) and len(value) == 0):
+            # the empty string is a member of every string
+            return True
 
         # general test for membership, including single-character string values
         for item in self:
@@ -192,8 +190,7 @@ class gapbuffer(object):
 
         # clear the buffer if 0 or less was specified
         if n <= 0:
-            # completely rebuild this buffer
-            self.__init__(self.__buf.typecode, min_gap_size=self.__min_gap_size)
+            del self[:]
         else:
             for i in xrange(n - 1):
                 self.extend(self)

@@ -171,6 +171,34 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertTrue(s2 >= s1 and b2 >= b1)
 
+    def test_cmp_same_other_shorter(self):
+        """Does comparing buffers work when the buffers are identical, besides
+        their lengths?"""
+
+        s1 = "abc"
+        s2 = "ab"
+
+        b1 = gapbuffer("c", s1)
+        b2 = gapbuffer("c", s2)
+
+        self.assertEqual(cmp(s1, s2), cmp(b1, b2))
+
+    def test_cmp_same_other_infinite(self):
+        """Does comparing buffers work when the buffers are identical, but the
+        other iterable is infinite?"""
+
+        # infinite sequence generator
+        def g():
+            while 1:
+                yield "a"
+
+        s1 = "aaaa"
+        s2 = g()
+
+        b1 = gapbuffer("c", s1)
+
+        self.assertEqual(cmp(s1, s2), cmp(b1, s2))
+
     def test_in_nonstring(self):
         """Do non string-based buffers contain items that are in them?"""
 
@@ -217,7 +245,9 @@ class TestGapBuffer(unittest.TestCase):
 
         bc = gapbuffer("c", "hello, world!")
         bu = gapbuffer("u", u"hello, world!")
+
         for b in [bc, bu]:
+            self.assertTrue("" in b)
             self.assertTrue("h" in b)
             self.assertTrue(u"h" in b)
             self.assertTrue("hello" in b)
@@ -226,6 +256,9 @@ class TestGapBuffer(unittest.TestCase):
             self.assertTrue(u"foo" not in b)
             self.assertTrue(["f", "o", "o"] not in b)
             self.assertTrue([u"f", u"o", u"o"] not in b)
+
+        self.assertTrue("" in gapbuffer("c"))
+        self.assertTrue(u"" in gapbuffer("u"))
 
     def test_in_string_added(self):
         """Do string-based buffers contain sequences that are added to them?"""
