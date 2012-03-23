@@ -593,6 +593,22 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(b, content)
 
+    def test_set_slice_generator(self):
+        """Does setting a slice to a generator work?"""
+
+        # sequence generator, has no __len__ method
+        def g():
+            for i in xrange(10):
+                yield i
+
+        content = [0, 1, 2, 3, 4]
+        b = gapbuffer("i", content)
+
+        b[1:3] = g()
+        content[1:3] = g()
+
+        self.assertEqual(b, content)
+
     def test_set_slice_entire_range(self):
         """Does setting the entire range work?"""
 
