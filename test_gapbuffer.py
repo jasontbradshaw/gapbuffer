@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 
 import unittest
+
+# use coverage if available. called here to ensurce function/class definitions
+# are included in coverage data.
+try:
+    from coverage import coverage
+    coverage = coverage(config_file=False, branch=True, omit=["test_*.py"])
+    coverage.start()
+except ImportError:
+    coverage = None
+
 from gapbuffer import gapbuffer
 
 # correct content for each typecode
@@ -1477,3 +1487,8 @@ class TestGapBuffer(unittest.TestCase):
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
+
+    # end coverage and generate a report if coverage was loaded
+    if coverage is not None:
+        coverage.stop()
+        coverage.html_report(directory="htmlcov")
