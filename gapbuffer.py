@@ -86,8 +86,14 @@ class gapbuffer(object):
         other.
         """
 
+        # don't compare with things that have no length method since iterating
+        # over them might modify them if they're generators.
+        if not hasattr(other, "__len__"):
+            # we're always greater than non-iterable objects
+            return 1
+
         # fill value guaranteed to be unique to this fun. call and inaccessible
-        fv = lambda: None
+        fv = object()
         for si, oi in itertools.izip_longest(self, other, fillvalue=fv):
             # we're shorter than the other iterable and aren't different
             if si is fv:
