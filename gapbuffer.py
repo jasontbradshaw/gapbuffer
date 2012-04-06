@@ -29,18 +29,18 @@ class gapbuffer(object):
         "d": (0.0, "double")
     }
 
-    def __init__(self, typecode, initial_content=[], min_gap_size=10):
+    def __init__(self, typecode, initial_content=[], gap_size=10):
         """
         TODO
         """
 
         # minimum space to create for the new gap when resizing the current one
-        self.__min_gap_size = min_gap_size
+        self.__min_gap_size = gap_size
 
         # allocate the initial gap for the internal buffer. if the typecode is
         # invalid, array.array throws a nice ValueError for us.
         item = gapbuffer.TYPE_INFO[typecode][0]
-        self.__buf = array.array(typecode, (item for i in xrange(min_gap_size)))
+        self.__buf = array.array(typecode, (item for i in xrange(gap_size)))
 
         # first space of the gap, initially always at the start of the buffer
         self.__gap_start = 0
