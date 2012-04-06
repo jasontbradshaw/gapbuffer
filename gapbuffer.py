@@ -195,10 +195,11 @@ class gapbuffer(object):
             for i in xrange(n - 1):
                 self.extend(self)
 
-    def __enforce_index(self, index):
-        """Ensures the given index is valid for the current buffer size."""
-        if index >= len(self) or index < -len(self):
-            raise IndexError(self.__class__.__name__ + " index out of range")
+    def __enforce_index(self, *indices):
+        """Ensures the given indices are valid for the current buffer size."""
+        for index in indices:
+            if index >= len(self) or index < -len(self):
+                raise IndexError(self.__class__.__name__ + " index out of range")
 
     def __getitem__(self, x):
         """Get the item or slice at the given index."""
@@ -317,26 +318,24 @@ class gapbuffer(object):
 
     def index(self, item, start=0, end=None):
         """
-        Return the index of the first occurence of 'item' in this gapbuffer such
-        that 'start' (default 0) <= the index of 'item' < end (default end of
-        the buffer). Return negative if the item was not found.
+        Return the index of the first occurence of 'item' in this gapbuffer from
+        the slice between the optional start (default 0) and end (default end of
+        buffer) values.
         """
 
         # set a default for the end
-        if end is None:
-            end = len(self)
+        end = end or len(self)
 
-        # make sure start and end are valid
-        self.__enforce_index(start)
-        self.__enforce_index(end - 1)
+        # only check if we have an increasing, non-empty range
+        if start != end:
+            # return the index for the first matching item
+            for i in xrange(*slice(start, end).indices(len(self))):
+                if self[i] == item:
+                    return i
 
-        # if an item matches, return its index
-        for i in xrange(start, end):
-            if self[i] == item:
-                return i
-
-        # otherwise, return failure
-        return -1
+        # signal failure if we couldn't find anything
+        raise ValueError(self.__class__.__name__ +
+                ".index(x): x is not in " + self.__class__.__name__)
 
     def count(self, item):
         """Return the number of times 'item' occurs in this gapbuffer."""

@@ -968,7 +968,7 @@ class TestGapBuffer(unittest.TestCase):
 
         b = gapbuffer("i")
 
-        with self.assertRaises(IndexError):
+        with self.assertRaises(ValueError):
             b.index(0)
 
     def test_index_not_present(self):
