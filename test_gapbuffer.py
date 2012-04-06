@@ -1484,6 +1484,37 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(b, ([-1] * gap_size) + range(5))
 
+    def test_resize_gap(self):
+        """Does increasing the gap size work?"""
+
+        gap_size = 3
+        b = gapbuffer("i", range(5), gap_size=gap_size)
+
+        # gap should resize if more items are added than spaces it contains
+        [b.insert(0, -1) for i in xrange(gap_size + 1)]
+
+        self.assertEqual(b, ([-1] * (gap_size + 1)) + range(5))
+
+    def test_resize_gap_during_extend(self):
+        """Does increasing the gap size during extend() work?"""
+
+        gap_size = 3
+        b = gapbuffer("i", range(5), gap_size=gap_size)
+
+        b.extend([-1] * (gap_size + 1))
+
+        self.assertEqual(b, ([-1] * (gap_size + 1)) + range(5))
+
+    def test_resize_gap_multiple_times(self):
+        """Does increasing the gap size so it must resize several times work?"""
+
+        gap_size = 3
+        b = gapbuffer("i", range(5), gap_size=gap_size)
+
+        b.extend([-1] * (gap_size * 4))
+
+        self.assertEqual(b, ([-1] * (gap_size * 4)) + range(5))
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
