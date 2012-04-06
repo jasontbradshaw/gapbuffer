@@ -89,16 +89,16 @@ class TestGapBuffer(unittest.TestCase):
                     gapbuffer("u", VALID_CONTENT[typecode])
 
     def test_context_manager_read(self):
-        """Does using the context manager to read the internal buffer work?"""
+        """Does using the context manager to read the raw buffer work?"""
 
         for typecode in VALID_CONTENT:
             b = gapbuffer(typecode, VALID_CONTENT[typecode])
 
             with b as raw_b:
-                self.assertEqual(VALID_CONTENT[typecode], raw_b)
+                self.assertEqual(list(VALID_CONTENT[typecode]), raw_b.tolist())
 
-    def test_context_manager_write(self):
-        """Does using the context manager to read the internal buffer work?"""
+    def test_context_manager_add(self):
+        """Does using the context manager to add to the raw buffer work?"""
 
         for typecode in VALID_CONTENT:
             b = gapbuffer(typecode, VALID_CONTENT[typecode])
@@ -109,6 +109,19 @@ class TestGapBuffer(unittest.TestCase):
 
             # see if the content is counted as part of the buffer
             self.assertEqual(VALID_CONTENT[typecode] * 2, b)
+
+    def test_context_manager_delete(self):
+        """Does using the context manager to pop from the raw buffer work?"""
+
+        for typecode in VALID_CONTENT:
+            b = gapbuffer(typecode, VALID_CONTENT[typecode])
+
+            # add content to the underlying buffer
+            with b as raw_b:
+                raw_b.pop()
+
+            # see if the content is counted as part of the buffer
+            self.assertEqual(VALID_CONTENT[typecode][:-1], b)
 
     def test_eq(self):
         """Test all typecodes for equality to their respective initial content.
