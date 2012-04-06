@@ -1447,6 +1447,35 @@ class TestGapBuffer(unittest.TestCase):
             content = VALID_CONTENT[typecode]
             self.assertTrue(repr(gapbuffer(typecode, content)) is not None)
 
+    def test_move_gap(self):
+        """Does moving the gap work?"""
+
+        # add to the beginning, to make sure the gap is at the beginning
+        gap_size = 3
+        b = gapbuffer("i", range(5), gap_size=gap_size)
+        b.insert(0, -1)
+
+        # extend with an empty iterable, to force a gap move to the end
+        b.extend([])
+
+        # make sure it worked
+        self.assertEqual(b, [-1] + range(5))
+
+    def test_move_gap_zero_length(self):
+        """Does moving a zero-length gap work?"""
+
+        # fill the gap from the beginning so it has no space left, forcing the
+        # gap to be at the start of the buffer.
+        gap_size = 3
+        b = gapbuffer("i", range(5), gap_size=gap_size)
+        [b.insert(0, -1) for i in xrange(gap_size)]
+
+        # extend with an empty iterable, to force a gap move to the end
+        b.extend([])
+
+        # make sure it worked
+        self.assertEqual(b, ([-1] * gap_size) + range(5))
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
