@@ -1458,7 +1458,6 @@ class TestGapBuffer(unittest.TestCase):
         # extend with an empty iterable, to force a gap move to the end
         b.extend([])
 
-        # make sure it worked
         self.assertEqual(b, [-1] + range(5))
 
     def test_move_gap_zero_length(self):
@@ -1473,7 +1472,6 @@ class TestGapBuffer(unittest.TestCase):
         # extend with an empty iterable, to force a gap move to the end
         b.extend([])
 
-        # make sure it worked
         self.assertEqual(b, ([-1] * gap_size) + range(5))
 
 if __name__ == "__main__":
