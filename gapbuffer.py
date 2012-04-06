@@ -129,24 +129,10 @@ class gapbuffer(object):
         if (self.typecode in ["u", "c"] and isinstance(value, basestring)
                 and len(value) > 1):
 
-            # store the gap size for later
-            gap_len = self.__gap_len
-
-            # move the gap to the end of the buffer
-            self.__move_gap(len(self))
-
-            # remove the gap. this should just be a pointer update in the C code
-            for i in xrange(self.__gap_len):
-                self.__buf.pop(len(self.__buf))
-
-            # get the result, replace the gap, then return the stored result
-            result = re.search(re.escape(value), self.__buf) is not None
-
-            for i in xrange(gap_len):
-                item = gapbuffer.TYPE_CODES[self.typecode][0]
-                self.__buf.extend(item for i in xrange(gap_len))
-
-            return result
+            # search the gap-less version of our underlying buffer
+            with self as buf:
+                # escape the given string and return whether a result was found
+                return re.search(re.escape(value), buf) is not None
 
         elif (self.typecode in ["u", "c"] and
                 isinstance(value, basestring) and len(value) == 0):
@@ -320,6 +306,30 @@ class gapbuffer(object):
                 # expand the gap to cover it
                 self.__resize_gap(len(xr))
                 self.__gap_end += len(xr)
+
+    def __enter__(self):
+        """
+        Return the raw array.array underlying the buffer, sans gap. This allows
+        for easy manipulation of the underlying data structure without worrying
+        about breaking state in the buffer at large.
+        """
+
+        # move the gap to the end of the buffer
+        self.__move_gap(len(self))
+
+        # remove the gap. this should just be a pointer update in the C code
+        for i in xrange(self.__gap_len):
+            self.__buf.pop(len(self.__buf))
+
+        # give the context the raw buffer
+        return self.__buf
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        """Replace the gap when context happens, doing nothing about errors."""
+
+        # add a new gap at the end of the buffer
+        item = gapbuffer.TYPE_CODES[self.typecode][0]
+        self.__buf.extend(item for i in xrange(self.__gap_size))
 
     def index(self, item, start=0, end=None):
         """
