@@ -396,7 +396,7 @@ class gapbuffer(object):
         """Sort the items of this gapbuffer in-place."""
         raise NotImplementedError()
 
-    def debug_view(self):
+    def debug_view(self): # pragma: no cover
         """
         Get a debug view of the buffer's contents and internal values as a
         unicode string.
