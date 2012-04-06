@@ -317,19 +317,25 @@ class gapbuffer(object):
         # move the gap to the end of the buffer
         self.__move_gap(len(self))
 
-        # remove the gap. this should just be a pointer update in the C code
-        for i in xrange(self.__gap_len):
-            self.__buf.pop(len(self.__buf))
+        # remove the gap. this should just be a pointer update in the C code.
+        del self.__buf[self.__gap_start:]
 
         # give the context the raw buffer
         return self.__buf
 
     def __exit__(self, exception_type, exception_value, traceback):
-        """Replace the gap when context happens, doing nothing about errors."""
+        """Replace the gap when context exits, ignoring any errors."""
 
         # add a new gap at the end of the buffer
         item = gapbuffer.TYPE_CODES[self.typecode][0]
         self.__buf.extend(item for i in xrange(self.__gap_size))
+
+        # account for any size change in the buffer
+        self.__content_end = len(self.__buf)
+
+        # move the gap pointers to point at the new gap
+        self.__gap_start = self.__content_end - self.__gap_size
+        self.__gap_end = self.__content_end
 
     def index(self, item, start=0, end=None):
         """
@@ -371,11 +377,9 @@ class gapbuffer(object):
         gapbuffer.
         """
 
-        # put the gap at the beginning of the buffer
-        self.__move_gap(0)
-
-        # append the other iterable's items to the end of the existing buffer
-        self.__buf.extend(other)
+        # append the other iterable's items to the end of the existing raw buffer
+        with self as buf:
+            buf.extend(other)
 
     def insert(self, index, item):
         """Insert an item at the given index."""
@@ -512,31 +516,30 @@ class gapbuffer(object):
         # make sure we're within virtual buffer bounds. the start of the
         # gap is always the same as the virtual buffer index, so we must limit
         # it to this since its end extends to the end of the actual buffer.
-        assert 0 <= index < len(self)
+        assert 0 <= index <= len(self)
 
         # optimize for moving a zero-length gap (avoids needless copies)
         if self.__gap_len == 0:
             self.__gap_start = self.__gap_end = index
-            return
+        else:
+            # move the gap left as far as necessary
+            while self.__gap_start > index:
+                # slide the gap to the left
+                self.__gap_start -= 1
+                self.__gap_end -= 1
 
-        # move the gap left as far as necessary
-        while self.__gap_start > index:
-            # slide the gap to the left
-            self.__gap_start -= 1
-            self.__gap_end -= 1
+                # copy the gap's former preceding character to the gap's old
+                # final slot.
+                self.__buf[self.__gap_end] = self.__buf[self.__gap_start]
 
-            # copy the gap's former preceding character to the gap's old
-            # final slot.
-            self.__buf[self.__gap_end] = self.__buf[self.__gap_start]
+            # move the gap right as far as necessary
+            while self.__gap_start < index:
+                # copy the gap's following character to the gap's first slot.
+                self.__buf[self.__gap_start] = self.__buf[self.__gap_end]
 
-        # move the gap right as far as necessary
-        while self.__gap_start < index:
-            # copy the gap's following character to the gap's first slot.
-            self.__buf[self.__gap_start] = self.__buf[self.__gap_end]
-
-            # slide the gap to the right
-            self.__gap_start += 1
-            self.__gap_end += 1
+                # slide the gap to the right
+                self.__gap_start += 1
+                self.__gap_end += 1
 
     def __str__(self):
         """Return the string representation of the buffer's contents."""
