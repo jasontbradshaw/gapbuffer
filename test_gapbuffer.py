@@ -1442,7 +1442,7 @@ class TestGapBuffer(unittest.TestCase):
             self.assertTrue(unicode(gapbuffer(typecode, content)) is not None)
 
     def test_repr(self):
-        """Does __repr work?"""
+        """Does __repr__ work?"""
         for typecode in VALID_CONTENT:
             content = VALID_CONTENT[typecode]
             self.assertTrue(repr(gapbuffer(typecode, content)) is not None)
