@@ -389,6 +389,10 @@ class TestGapBuffer(unittest.TestCase):
             self.assertEqual(b * 1, content)
             self.assertEqual(b * 2, content * 2)
 
+            # this can't work since built-ins don't support gapbuffer
+            with self.assertRaises(TypeError):
+                0 * b
+
     def test_imul(self):
         """Does multiplying gapbuffers incrementally work?"""
 
