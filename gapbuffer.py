@@ -416,6 +416,10 @@ class gapbuffer(object):
             for i in xrange(len(self) / 2):
                 self[-(i + 1)], self[i] = self[i], self[-(i + 1)]
 
+    def sort(self, cmp=None, key=None, reverse=False):
+        """Sort the items of this gapbuffer in-place."""
+        raise NotImplementedError()
+
     def debug_view(self): # pragma: no cover
         """
         Get a debug view of the buffer's contents and internal values as a
