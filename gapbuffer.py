@@ -14,7 +14,7 @@ class gapbuffer(object):
     # type information for the different types our internal array can take on.
     # used to initialize the internal array to some non-zero size and to get
     # formal names for the type codes.
-    TYPE_INFO = {
+    TYPE_CODES = {
         "c": (str(' '), "character"),
         "b": (0, "signed character"),
         "B": (0, "unsigned character"),
@@ -39,7 +39,7 @@ class gapbuffer(object):
 
         # allocate the initial gap for the internal buffer. if the typecode is
         # invalid, array.array throws a nice ValueError for us.
-        item = gapbuffer.TYPE_INFO[typecode][0]
+        item = gapbuffer.TYPE_CODES[typecode][0]
         self.__buf = array.array(typecode, (item for i in xrange(gap_size)))
 
         # first space of the gap, initially always at the start of the buffer
@@ -58,7 +58,7 @@ class gapbuffer(object):
         except TypeError:
             # map array's TypeError to our own version of the same
             raise TypeError(self.__class__.__name__ + " items must be of type "
-                    + gapbuffer.TYPE_INFO[typecode][1])
+                    + gapbuffer.TYPE_CODES[typecode][1])
 
         # the space immediately following the final item in the buffer,
         # including space for the gap. i.e., if the gap is at the very end of
@@ -462,7 +462,7 @@ class gapbuffer(object):
         assert factor > 0
 
         # increase the buffer size by our factor until it's long enough
-        item = gapbuffer.TYPE_INFO[self.__buf.typecode][0]
+        item = gapbuffer.TYPE_CODES[self.typecode][0]
         while len(self.__buf) < target_size:
             extend_len = max(1, int((1.0 + factor) * (1 + len(self.__buf))))
             self.__buf.extend(item for i in xrange(extend_len))
