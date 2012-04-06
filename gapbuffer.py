@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import array
-from itertools import izip, izip_longest
+import itertools
 import re
 
 class gapbuffer(object):
@@ -88,7 +88,7 @@ class gapbuffer(object):
 
         # fill value guaranteed to be unique to this fun. call and inaccessible
         fv = lambda: None
-        for i, (si, oi) in enumerate(izip_longest(self, other, fillvalue=fv)):
+        for si, oi in itertools.izip_longest(self, other, fillvalue=fv):
             # we're shorter than the other iterable and aren't different
             if si is fv:
                 return -1
@@ -253,7 +253,7 @@ class gapbuffer(object):
                         str(len(xr)))
 
             # set the indices in the range to their new values
-            for i, v in izip(xr, values):
+            for i, v in itertools.izip(xr, values):
                 self[i] = v
         else:
             # move the gap to the start and ensure it's large enough
