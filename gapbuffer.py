@@ -66,6 +66,11 @@ class gapbuffer(object):
         self.__content_end = len(self.__buf)
 
     @property
+    def typecode(self):
+        """The read-only typecode of this gapbuffer."""
+        return self.__buf.typecode
+
+    @property
     def __gap_len(self):
         """Get the length of the current gap."""
         return self.__gap_end - self.__gap_start
@@ -121,7 +126,7 @@ class gapbuffer(object):
         """
 
         # substring test for character and unicode buffers
-        if (self.__buf.typecode in ["u", "c"] and isinstance(value, basestring)
+        if (self.typecode in ["u", "c"] and isinstance(value, basestring)
                 and len(value) > 1):
 
             # store the gap size for later
@@ -138,12 +143,12 @@ class gapbuffer(object):
             result = re.search(re.escape(value), self.__buf) is not None
 
             for i in xrange(gap_len):
-                item = gapbuffer.TYPE_INFO[self.__buf.typecode][0]
+                item = gapbuffer.TYPE_CODES[self.typecode][0]
                 self.__buf.extend(item for i in xrange(gap_len))
 
             return result
 
-        elif (self.__buf.typecode in ["u", "c"] and
+        elif (self.typecode in ["u", "c"] and
                 isinstance(value, basestring) and len(value) == 0):
             # the empty string is a member of every string
             return True
@@ -161,7 +166,7 @@ class gapbuffer(object):
         new buffer.
         """
 
-        added = gapbuffer(self.__buf.typecode, self)
+        added = gapbuffer(self.typecode, self)
         added.extend(other)
 
         return added
@@ -176,7 +181,7 @@ class gapbuffer(object):
         result as a new buffer.
         """
 
-        multiplied = gapbuffer(self.__buf.typecode)
+        multiplied = gapbuffer(self.typecode)
 
         # don't concatenate if 0 or less was specified
         if n > 0:
@@ -223,7 +228,7 @@ class gapbuffer(object):
         """Get the sequence at the given slice."""
 
         # unpack 'indices()' into xrange as a generator for our items
-        return gapbuffer(self.__buf.typecode,
+        return gapbuffer(self.typecode,
                 (self[i] for i in xrange(*s.indices(len(self)))))
 
     def __setitem__(self, x, value):
@@ -250,7 +255,7 @@ class gapbuffer(object):
         if not hasattr(value, "__len__"):
             values = [v for v in value]
 
-        # handle extended slices
+        # handle extended slices, which are the same size as what they replace
         if s.step is not None and s.step != 1:
             # get our range
             xr = xrange(*s.indices(len(self)))
@@ -530,7 +535,7 @@ class gapbuffer(object):
         # str/unicode conversions.
 
         # do more compact representations for string and unicode types
-        if self.__buf.typecode in ["u", "c"]:
+        if self.typecode in ["u", "c"]:
             return ''.join(c for c in self)
 
         # turn all other types into a simple list
@@ -539,23 +544,23 @@ class gapbuffer(object):
     def __unicode__(self):
         """Return the unicode representation of the buffer's contents."""
 
-        if self.__buf.typecode in ["u", "c"]:
+        if self.typecode in ["u", "c"]:
             return u''.join(c for c in self)
 
         return unicode(repr([i for i in self]))
 
     def __repr__(self):
         # class name, typecode, and opening paren
-        s = unicode(self.__class__.__name__ + "(" + repr(self.__buf.typecode))
+        s = unicode(self.__class__.__name__ + "(" + repr(self.typecode))
 
         # add the content representation if there is any
         if len(self) > 0:
             s += u", "
 
             # do more compact represenstations for string and unicode types
-            if self.__buf.typecode == "c":
+            if self.typecode == "c":
                 s += repr(''.join(c for c in self))
-            elif self.__buf.typecode == "u":
+            elif self.typecode == "u":
                 s += repr(u''.join(c for c in self))
             else:
                 # turn all other types into a simple list
