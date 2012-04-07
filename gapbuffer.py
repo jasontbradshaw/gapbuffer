@@ -166,6 +166,7 @@ class gapbuffer(object):
     def __iadd__(self, other):
         """Concatenate the other iterable to this one in-place."""
         self.extend(other)
+        return self
 
     def __mul__(self, n):
         """
@@ -191,6 +192,8 @@ class gapbuffer(object):
         else:
             for i in xrange(n - 1):
                 self.extend(self)
+
+        return self
 
     def __enforce_index(self, *indices):
         """Ensures the given indices are valid for the current buffer size."""
