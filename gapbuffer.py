@@ -28,9 +28,16 @@ class gapbuffer(object):
         "d": (0.0, "double")
     }
 
-    def __init__(self, typecode, initial_content=[], gap_size=10):
+    def __init__(self, typecode, initial_content=[], gap_size=100):
         """
-        TODO
+        Create a gapbuffer. typecode is the type of content the gapbuffer will
+        contain (see the keys of the TYPE_CODES dictionary on the class for
+        valid type codes). initial_content is the content to use when
+        initializing the gapbuffer for the first time (empty by default).
+        gap_size is the default size of the gap to use. A larger gap_size means
+        more items can be inserted without resizing the underlying array, but
+        the gapbuffer will use more memory than if the gap was smaller (default
+        100).
         """
 
         # minimum space to create for the new gap when resizing the current one
