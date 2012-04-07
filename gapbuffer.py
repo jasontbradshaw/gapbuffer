@@ -34,7 +34,7 @@ class gapbuffer(object):
         """
 
         # minimum space to create for the new gap when resizing the current one
-        self.__gap_size = gap_size
+        self.gap_size = gap_size
 
         # allocate the initial gap for the internal buffer. if the typecode is
         # invalid, array.array throws a nice ValueError for us.
@@ -338,13 +338,13 @@ class gapbuffer(object):
 
         # add a new gap at the end of the buffer
         item = gapbuffer.TYPE_CODES[self.typecode][0]
-        self.__buf.extend(item for i in xrange(self.__gap_size))
+        self.__buf.extend(item for i in xrange(self.gap_size))
 
         # account for any size change in the buffer
         self.__content_end = len(self.__buf)
 
         # move the gap pointers to point at the new gap
-        self.__gap_start = self.__content_end - self.__gap_size
+        self.__gap_start = self.__content_end - self.gap_size
         self.__gap_end = self.__content_end
 
     def index(self, item, start=0, end=None):
@@ -497,7 +497,7 @@ class gapbuffer(object):
 
         if self.__gap_len < target_size:
             # calculate size increase of the gap, including the min gap size
-            gap_delta = target_size + self.__gap_size - self.__gap_len
+            gap_delta = target_size + self.gap_size - self.__gap_len
 
             # make room for the current content and the new gap
             self.__resize_buf(len(self.__buf) + gap_delta)
