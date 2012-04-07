@@ -430,8 +430,12 @@ class gapbuffer(object):
     def debug_view(self): # pragma: no cover
         """
         Get a debug view of the buffer's contents and internal values as a
-        unicode string.
+        unicode string. Only works for text ('c' or 'u') buffers.
         """
+
+        # disallow use for non-text buffers
+        if self.typecode not in ['c', 'u']:
+            return "Only works for 'c' and 'u' buffers. got: " + self.typecode
 
         # write special values into gap
         for i in xrange(self.__gap_start, self.__gap_end):
