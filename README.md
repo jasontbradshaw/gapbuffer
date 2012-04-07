@@ -6,6 +6,30 @@ in pure Python using the `array` module. Supports all the functions you'd expect
 of an iterable, and additionally allows comparisons against non-gapbuffer
 iterables.
 
+Usage
+----
+A `gapbuffer` uses an `array.array` internally to store its data, and is
+therefor bound by the same constraints the `array.array` is, namely that it can
+only contain items of the same type, and that the type must be specified at
+instantiation.
+
+See the `array` module documentation at http://docs.python.org/library/array.html
+for valid type codes and usage examples.
+
+#### Example:
+```python
+from gapbuffer import gapbuffer
+
+g = gapbuffer("c", "hello, world!")
+print g # prints 'hello, world!'
+
+g[5:5] = " there"
+print g # prints 'hello there, world!'
+
+del g[11:-1]
+print g # prints 'hello there!'
+```
+
 How it Works
 ---
 A gap buffer is an array optimized for insertions that happen near each other,
