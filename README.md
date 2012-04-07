@@ -2,9 +2,9 @@ gapbuffer
 ====
 
 A gap buffer ([wikipedia](http://en.wikipedia.org/wiki/Gap_buffer)) implemented
-in pure Python using the `array` module. Supports all the functions you'd expect
-of an iterable, and additionally allows comparisons against non-gapbuffer
-iterables.
+in pure Python using the `array` module. It supports almost all the functions
+you'd expect of an iterable, and additionally allows comparisons against
+non-gapbuffer iterables.
 
 Usage
 ----
@@ -16,18 +16,28 @@ instantiation.
 See the `array` module documentation at http://docs.python.org/library/array.html
 for valid type codes and usage examples.
 
-#### Example:
+Now for some code:
 ```python
 from gapbuffer import gapbuffer
 
 g = gapbuffer("c", "hello, world!")
-print g # prints 'hello, world!'
+print g                          # prints 'hello, world!'
 
 g[5:5] = " there"
-print g # prints 'hello there, world!'
+print g                          # prints 'hello there, world!'
 
 del g[11:-1]
-print g # prints 'hello there!'
+print g                          # prints 'hello there!'
+
+print g.pop()                    # prints '!'
+print g                          # prints 'hello there'
+
+g.extend(", i'm a gapbuffer!")
+print g                          # prints 'hello there, i'm a gapbuffer!'
+
+print 'there' in g               # prints 'True'
+print 'tear' in g                # prints 'False'
+print g.index("o")               # prints '4'
 ```
 
 How it Works
