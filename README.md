@@ -1,9 +1,9 @@
 gapbuffer
 ====
 
-A gap buffer ([wiki](http://en.wikipedia.org/wiki/Gap_buffer)) implemented in
-pure Python using the `array` module. Supports all the functions you'd expect of
-an iterable, and additionally allows comparisons against non-gapbuffer
+A gap buffer ([wikipedia](http://en.wikipedia.org/wiki/Gap_buffer)) implemented
+in pure Python using the `array` module. Supports all the functions you'd expect
+of an iterable, and additionally allows comparisons against non-gapbuffer
 iterables.
 
 How it Works
@@ -11,9 +11,8 @@ How it Works
 A gap buffer is an array optimized for insertions that happen near each other,
 like those in a text editor.
 
-Say we have some text, 'hello, world!'. Our buffer might look like this:
-`hello, world!_____`
-where the underscores are the gap.
+Say we have some text, `hello, world!`. Internally, our buffer might look like
+`hello, world!_____`, where the underscores represent the gap.
 
 Say we want to insert some text in the middle of the string. First, we move the
 gap iteratively to the point we want to insert the text, copying characters from
@@ -75,8 +74,11 @@ If we want to delete some text, we just expand the gap to consume it:
 
 Leaving us with `hello there!`.
 
-The `gapbuffer` class handles all of this internally, so all a user has to do is
-use it like one would use the `array` module. Inserts and deletes that are
+When the content to be inserted is larger than the gap, the gap is expanded and
+the existing content is moved further down the buffer.
+
+The `gapbuffer` class handles this manipulation internally, so all a user has to
+do is use it like one would use the `array` module. Inserts and deletes that are
 near the same location should show near linear behavior on the length of the
 inserted content, as long as the content doesn't exceed the average size of the
 gap.
