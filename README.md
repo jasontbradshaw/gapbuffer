@@ -132,7 +132,7 @@ the existing content is moved further down the buffer.
 
 The `gapbuffer` class handles this manipulation internally, so all a user has to
 do is use it like one would use the `array` module. Inserts and deletes that are
-near the same location should show near linear behavior on the length of the
+near the same location should show near-linear behavior on the length of the
 inserted content, as long as the content doesn't exceed the average size of the
 gap.
 
