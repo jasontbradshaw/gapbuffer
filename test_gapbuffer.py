@@ -274,7 +274,7 @@ class TestGapBuffer(unittest.TestCase):
         b = gapbuffer("i", seq)
 
         self.assertTrue(0 in b)
-        b.pop()
+        b.pop(0)
         self.assertTrue(0 not in b)
 
     def test_in_nonstring_sequece(self):
@@ -317,9 +317,9 @@ class TestGapBuffer(unittest.TestCase):
         u = u"hello, world!"
         bu = gapbuffer("u", u)
 
-        self.assertTrue(u"pants" not in b)
+        self.assertTrue(u"pants" not in bu)
         bu.extend(u" pants")
-        self.assertTrue(u"pants" in b)
+        self.assertTrue(u"pants" in bu)
 
     def test_in_string_deleted(self):
         """Do string-based buffers contain sequences that have been removed from
@@ -330,14 +330,14 @@ class TestGapBuffer(unittest.TestCase):
         b = gapbuffer("c", s)
 
         self.assertTrue("world" in b)
-        del b[4:]
+        del b[5:]
         self.assertTrue("world" not in b)
 
         u = u"hello, world!"
         bu = gapbuffer("u", u)
 
         self.assertTrue(u"world" in bu)
-        del b[4:]
+        del bu[5:]
         self.assertTrue(u"world" not in bu)
 
     def test_add(self):
@@ -535,7 +535,7 @@ class TestGapBuffer(unittest.TestCase):
             content = VALID_CONTENT[typecode]
             b = gapbuffer(typecode, content)
 
-            for index, item in enumerate(reversed(content)):
+            for index, item in enumerate(content):
                 b[-(index + 1)] = item
 
             self.assertEqual([i for i in reversed(content)], b)
@@ -1375,7 +1375,7 @@ class TestGapBuffer(unittest.TestCase):
 
         b2.reverse()
 
-        self.assertEqual(reversed(b1), b2)
+        self.assertEqual([i for i in reversed(b1)], b2)
 
     def test_str(self):
         """Does __str__ work?"""
@@ -1441,7 +1441,7 @@ class TestGapBuffer(unittest.TestCase):
 
         b.extend([-1] * (gap_size + 1))
 
-        self.assertEqual(b, ([-1] * (gap_size + 1)) + range(5))
+        self.assertEqual(b, range(5) + ([-1] * (gap_size + 1)))
 
     def test_resize_gap_multiple_times(self):
         """Does increasing the gap size so it must resize several times work?"""
@@ -1451,7 +1451,7 @@ class TestGapBuffer(unittest.TestCase):
 
         b.extend([-1] * (gap_size * 4))
 
-        self.assertEqual(b, ([-1] * (gap_size * 4)) + range(5))
+        self.assertEqual(b, range(5) + ([-1] * (gap_size * 4)))
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
