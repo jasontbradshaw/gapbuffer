@@ -38,6 +38,7 @@ print g                          # prints 'hello there, i'm a gapbuffer!'
 print 'there' in g               # prints 'True'
 print 'tear' in g                # prints 'False'
 print g.index("o")               # prints '4'
+
 ```
 
 How it Works
