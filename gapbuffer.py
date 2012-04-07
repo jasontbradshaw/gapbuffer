@@ -247,10 +247,13 @@ class gapbuffer(object):
         if not hasattr(value, "__len__"):
             values = [v for v in value]
 
+        # normalize slice indices
+        start, stop, step = s.indices(len(self))
+
         # handle extended slices, which are the same size as what they replace
-        if s.step is not None and s.step != 1:
+        if step != 1:
             # get our range
-            xr = xrange(*s.indices(len(self)))
+            xr = xrange(start, stop, step)
 
             # enforce range size for extended slices
             if len(values) != len(xr):
@@ -263,7 +266,7 @@ class gapbuffer(object):
                 self[i] = v
         else:
             # move the gap to the start and ensure it's large enough
-            self.__move_gap(s.start)
+            self.__move_gap(start)
             self.__resize_gap(len(values))
 
             # add all the data from values into the gap
@@ -288,29 +291,25 @@ class gapbuffer(object):
         self.__move_gap(i)
 
         # 'delete' the index by causing the gap to consume the index
-        self.__resize_gap(1)
         self.__gap_end += 1
 
     def __del_slice(self, s):
         """Delete some slice."""
 
         # get the range we'll be manipulating
-        xr = xrange(*s.indices(len(self)))
+        start, stop, step = s.indices(len(self))
+        xr = xrange(start, stop, step)
 
         # handle extended slices
-        if s.step is not None and s.step != 1:
+        if step != 1:
             # delete every item in the slice range
             for i in xr:
                 del self[i]
         else:
             # don't do anything if there was no gap given
             if len(xr) > 0:
-                # move the gap to the start and ensure it's large enough
-                self.__move_gap(s.start)
-                self.__resize_gap(len(xr))
-
-                # expand the gap to cover it
-                self.__resize_gap(len(xr))
+                # move the gap to the start and expand to cover the range
+                self.__move_gap(start)
                 self.__gap_end += len(xr)
 
     def __enter__(self):
@@ -514,6 +513,9 @@ class gapbuffer(object):
         # don't move the gap if it consists of the entire internal buffer
         if len(self) == 0:
             return
+
+        # normalize the index to a positive number if negative
+        index = len(self) + index if index < 0 else index
 
         # make sure we're within virtual buffer bounds. the start of the
         # gap is always the same as the virtual buffer index, so we must limit
