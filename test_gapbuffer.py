@@ -2,17 +2,6 @@
 
 import unittest
 
-# use coverage if available. called here to ensurce function/class definitions
-# are included in coverage data.
-try:
-    from coverage import coverage
-    coverage = coverage(config_file=False, branch=True, omit=["test_*.py"])
-    coverage.start()
-except ImportError:
-    coverage = None
-
-from gapbuffer import gapbuffer
-
 # correct content for each typecode
 VALID_CONTENT = {
     "c": str("abc"),
@@ -1457,10 +1446,21 @@ class TestGapBuffer(unittest.TestCase):
         self.assertEqual(b, range(5) + ([-1] * (gap_size * 4)))
 
 if __name__ == "__main__":
+    # generate coverage data if coverage module is available
+    try:
+        from coverage import coverage
+        cov = coverage(config_file=False, branch=True, omit=["test_*.py"])
+        cov.start()
+    except ImportError:
+        cov = None
+
+    # imported here so coverage can catch the function/class definitions
+    from gapbuffer import gapbuffer
+
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     # end coverage and generate a report if coverage was loaded
-    if coverage is not None:
-        coverage.stop()
-        coverage.html_report(directory="htmlcov")
+    if cov is not None:
+        cov.stop()
+        cov.html_report(directory="htmlcov")
