@@ -1446,6 +1446,8 @@ class TestGapBuffer(unittest.TestCase):
         self.assertEqual(b, range(5) + ([-1] * (gap_size * 4)))
 
 if __name__ == "__main__":
+    import sys
+
     # generate coverage data if coverage module is available
     try:
         from coverage import coverage
@@ -1458,7 +1460,7 @@ if __name__ == "__main__":
     from gapbuffer import gapbuffer
 
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGapBuffer)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.TextTestRunner(stream=sys.stdout, verbosity=2).run(suite)
 
     # end coverage and generate a report if coverage was loaded
     if cov is not None:
