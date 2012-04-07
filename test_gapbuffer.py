@@ -151,10 +151,12 @@ class TestGapBuffer(unittest.TestCase):
         for typecode in VALID_CONTENT:
             b = gapbuffer(typecode, VALID_CONTENT[typecode])
             self.assertNotEqual(VALID_CONTENT[typecode] * 2, b)
+            self.assertFalse(VALID_CONTENT[typecode] * 2 == b)
 
         for typecode in VALID_CONTENT:
             b = gapbuffer(typecode, VALID_CONTENT[typecode][:2])
             self.assertNotEqual(VALID_CONTENT[typecode], b)
+            self.assertFalse(VALID_CONTENT[typecode] == b)
 
     def test_lt(self):
         """Does comparing buffers with '<' work?"""
@@ -1394,6 +1396,7 @@ class TestGapBuffer(unittest.TestCase):
         for typecode in VALID_CONTENT:
             content = VALID_CONTENT[typecode]
             self.assertTrue(repr(gapbuffer(typecode, content)) is not None)
+            self.assertTrue(repr(gapbuffer(typecode, ())) is not None)
 
     def test_move_gap(self):
         """Does moving the gap work?"""
