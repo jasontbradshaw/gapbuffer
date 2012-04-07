@@ -303,8 +303,9 @@ class gapbuffer(object):
         # handle extended slices
         if step != 1:
             # delete every item in the slice range
-            for i in xr:
-                del self[i]
+            for count, index in enumerate(xr):
+                # account for already deleted indices
+                del self[index - count]
         else:
             # don't do anything if there was no gap given
             if len(xr) > 0:
