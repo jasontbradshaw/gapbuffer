@@ -22,23 +22,54 @@ Now for some code:
 from gapbuffer import gapbuffer
 
 g = gapbuffer("c", "hello, world!")
-print g                          # prints 'hello, world!'
+print g
+# prints 'hello, world!'
 
 g[5:5] = " there"
-print g                          # prints 'hello there, world!'
+print g
+# prints 'hello there, world!'
 
 del g[11:-1]
-print g                          # prints 'hello there!'
+print g
+# prints 'hello there!'
 
-print g.pop()                    # prints '!'
-print g                          # prints 'hello there'
+print g.pop()
+# prints '!'
+print g
+# prints 'hello there'
 
 g.extend(", i'm a gapbuffer!")
-print g                          # prints 'hello there, i'm a gapbuffer!'
+print g
+# prints 'hello there, i'm a gapbuffer!'
 
-print 'there' in g               # prints 'True'
-print 'tear' in g                # prints 'False'
-print g.index("o")               # prints '4'
+print 'there' in g
+# prints 'True'
+
+print 'tear' in g
+# prints 'False'
+
+print g.index("o")
+# prints '4'
+```
+
+gapbuffers support Python's `with` syntax to access the underlying `array`,
+sans-gap. This is useful for doing regular expression searches over the buffer,
+since the `re` library can't easily search over custom classes.
+
+```python
+from gapbuffer import gapbuffer
+import re
+
+g = gapbuffer("c", "you say goodbye, i say hello!")
+print re.findall("goodbye|hello", g)
+# raises 'TypeError: expected string or buffer'
+
+with g as buf:
+    print type(buf)
+    # prints "<type 'array.array'>"
+
+    print re.findall("goodbye|hello", buf)
+    # prints "[array('c', 'goodbye'), array('c', 'hello')]"
 ```
 
 How it Works
