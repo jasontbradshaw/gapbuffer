@@ -17,6 +17,7 @@ See the `array` module documentation at http://docs.python.org/library/array.htm
 for valid type codes and usage examples.
 
 Now for some code:
+
 ```python
 from gapbuffer import gapbuffer
 
