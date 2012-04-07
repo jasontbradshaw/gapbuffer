@@ -18,6 +18,7 @@ where the underscores are the gap.
 Say we want to insert some text in the middle of the string. First, we move the
 gap iteratively to the point we want to insert the text, copying characters from
 one end of the buffer to the other as we go:
+
 1. `hello, world!_______`
 2. `hello, world_______!`
 3. `hello, worl_______d!`
@@ -29,6 +30,7 @@ one end of the buffer to the other as we go:
 9. `hello_______, world!`
 
 Then, we insert some new text into the spaces left by the gap:
+
 1. `hello ______, world!`
 2. `hello t_____, world!`
 3. `hello th____, world!`
@@ -40,6 +42,7 @@ When we iterate over the contents, we only return the non-gap text, i.e. `hello
 there, world!`.
 
 If we want to delete some text, we just expand the gap to consume it:
+
 1. `hello there__ world!`
 2. `hello there___world!`
 3. `hello there____orld!`
