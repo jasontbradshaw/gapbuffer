@@ -241,8 +241,7 @@ class gapbuffer(object):
     def __set_slice(self, s, value):
         """Set the slice at some index."""
 
-        # make sure we can check the length of the value sequence, consuming
-        # it if necessary.
+        # get the length of the value sequence, consuming it if necessary.
         values = value
         if not hasattr(value, "__len__"):
             values = [v for v in value]
