@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import array
 import itertools
 import re
