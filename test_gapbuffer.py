@@ -77,6 +77,13 @@ class TestGapBuffer(unittest.TestCase):
                 with self.assertRaises(TypeError):
                     gapbuffer("u", VALID_CONTENT[typecode])
 
+    def test_typecode_property(self):
+        """The typecode property should return the typecode used in init."""
+
+        for typecode in VALID_CONTENT:
+            b = gapbuffer(typecode, VALID_CONTENT[typecode])
+            self.assertEqual(b.typecode, typecode)
+
     def test_context_manager_read(self):
         """Does using the context manager to read the raw buffer work?"""
 
