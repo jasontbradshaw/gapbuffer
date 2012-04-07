@@ -264,11 +264,14 @@ class gapbuffer(object):
             for i, v in itertools.izip(xr, values):
                 self[i] = v
         else:
-            # move the gap to the start and ensure it's large enough
+            # move the gap to the start of the slice
             self.__move_gap(start)
-            self.__resize_gap(len(values))
 
-            # add all the data from values into the gap
+            # resize the gap to contain the new values, then delete the old ones
+            self.__resize_gap(len(values))
+            self.__gap_end += stop - start
+
+            # replace old values with the new ones
             for v in values:
                 # add the next value and bump up the gap pointer as we go
                 self.__buf[self.__gap_start] = v

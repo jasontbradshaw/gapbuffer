@@ -833,7 +833,7 @@ class TestGapBuffer(unittest.TestCase):
         self.assertEqual(b, content)
 
     def test_del_slice_extended_very_large_range(self):
-        """Does deleting an extended slice with a very larger range work?"""
+        """Does deleting an extended slice with a very large range work?"""
 
         # should only delete first item
         content = [0, 1, 2, 3, 4, 5]
@@ -862,29 +862,6 @@ class TestGapBuffer(unittest.TestCase):
 
         b1[1:3] = []
         del b2[1:3]
-
-        self.assertEqual(b1, b2)
-
-    def test_del_slice_extended_congruency(self):
-        """Is deleting an extended slice equivalent to setting it to an empty
-        slice?
-        """
-
-        # entire range
-        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
-        b2 = gapbuffer("i", b1)
-
-        b1[::] = []
-        del b2[::]
-
-        self.assertEqual(b1, b2)
-
-        # sub-range
-        b1 = gapbuffer("i", [0, 1, 2, 3, 4, 5])
-        b2 = gapbuffer("i", b1)
-
-        b1[::2] = []
-        del b2[::2]
 
         self.assertEqual(b1, b2)
 
