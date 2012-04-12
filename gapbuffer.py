@@ -139,10 +139,6 @@ class gapbuffer(object):
 
         # substring test for character and unicode buffers
         if self.typecode in ["u", "c"] and isinstance(value, basestring):
-            # the empty string is a member of every string
-            if len(value) == 0:
-                return True
-
             # search the gap-less version of our underlying buffer
             with self as buf:
                 # escape the given string and return whether a result was found
@@ -374,6 +370,12 @@ class gapbuffer(object):
 
     def count(self, item):
         """Return the number of times 'item' occurs in this gapbuffer."""
+
+        if self.typecode in ["u", "c"] and isinstance(item, basestring):
+            # search the gap-less version of our underlying buffer
+            with self as buf:
+                # escape the given item and return the number of results found
+                return len(re.findall(re.escape(item), buf))
 
         result = 0
         for self_item in self:

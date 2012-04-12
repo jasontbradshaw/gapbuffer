@@ -941,6 +941,30 @@ class TestGapBuffer(unittest.TestCase):
 
         self.assertEqual(content.count(2), b.count(2))
 
+    def test_count_string(self):
+        """Does counting items in strings work?"""
+
+        content = "hello, hello, helo"
+        b = gapbuffer("c", content)
+
+        self.assertEqual(content.count(""), b.count(""))
+        self.assertEqual(content.count("h"), b.count("h"))
+        self.assertEqual(content.count("hello"), b.count("hello"))
+        self.assertEqual(content.count("helo"), b.count("helo"))
+        self.assertEqual(content.count("foo"), b.count("foo"))
+
+    def test_count_unicode(self):
+        """Does counting items in unicode strings work?"""
+
+        content = u"hello, hello, helo"
+        b = gapbuffer("u", content)
+
+        self.assertEqual(content.count(u""), b.count(u""))
+        self.assertEqual(content.count(u"h"), b.count(u"h"))
+        self.assertEqual(content.count(u"hello"), b.count(u"hello"))
+        self.assertEqual(content.count(u"helo"), b.count(u"helo"))
+        self.assertEqual(content.count(u"foo"), b.count(u"foo"))
+
     def test_count_multiples(self):
         """Does counting multiple items work?"""
 
