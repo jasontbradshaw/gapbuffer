@@ -371,12 +371,12 @@ class gapbuffer(object):
     def count(self, item):
         """Return the number of times 'item' occurs in this gapbuffer."""
 
+        # handle strings specially
         if self.typecode in ["u", "c"] and isinstance(item, basestring):
-            # search the gap-less version of our underlying buffer
             with self as buf:
-                # escape the given item and return the number of results found
                 return len(re.findall(re.escape(item), buf))
 
+        # handle other types normally
         result = 0
         for self_item in self:
             if self_item == item:
