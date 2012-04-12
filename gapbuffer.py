@@ -138,18 +138,15 @@ class gapbuffer(object):
         """
 
         # substring test for character and unicode buffers
-        if (self.typecode in ["u", "c"] and isinstance(value, basestring)
-                and len(value) > 1):
+        if self.typecode in ["u", "c"] and isinstance(value, basestring):
+            # the empty string is a member of every string
+            if len(value) == 0:
+                return True
 
             # search the gap-less version of our underlying buffer
             with self as buf:
                 # escape the given string and return whether a result was found
                 return re.search(re.escape(value), buf) is not None
-
-        elif (self.typecode in ["u", "c"] and
-                isinstance(value, basestring) and len(value) == 0):
-            # the empty string is a member of every string
-            return True
 
         # general test for membership, including single-character string values
         for item in self:
