@@ -355,7 +355,7 @@ class gapbuffer(object):
         """
 
         # set a default for the end
-        end = end or len(self)
+        end = len(self) if end is None else end
 
         # only check if we have an increasing, non-empty range
         if start != end:
