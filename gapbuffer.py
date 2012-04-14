@@ -523,8 +523,6 @@ class gapbuffer(object):
     def __move_gap(self, index):
         """Move the gap to some index."""
 
-        # TODO: test corner cases (0-length gap, gap to ends, etc.)
-
         # don't move the gap if it consists of the entire internal buffer
         if len(self) == 0:
             return
