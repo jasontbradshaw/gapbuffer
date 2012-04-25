@@ -2,9 +2,9 @@ gapbuffer
 ====
 
 A gap buffer ([wikipedia](http://en.wikipedia.org/wiki/Gap_buffer)) implemented
-in pure Python using the `array` module. It supports almost all the functions
-you'd expect of an iterable, and additionally allows comparisons against
-non-gapbuffer iterables.
+in pure Python using the `array` module. It supports all the functions you'd
+expect of an iterable, and additionally allows comparisons against non-gapbuffer
+iterables.
 
 Usage
 ----
@@ -16,12 +16,14 @@ instantiation.
 See the `array` module documentation at http://docs.python.org/library/array.html
 for valid type codes and usage examples.
 
-Now for some code:
+A demonstration is worth a thousand words:
 
 ```python
 from gapbuffer import gapbuffer
 
+# we want a character buffer, so we use the 'c' type code
 g = gapbuffer("c", "hello, world!")
+
 print g
 # prints 'hello, world!'
 
@@ -52,9 +54,9 @@ print g.index("o")
 # prints '4'
 ```
 
-gapbuffers support Python's `with` syntax to access the underlying `array`,
-sans-gap. This is useful for doing regular expression searches over the buffer,
-since the `re` library can't easily search over custom classes.
+gapbuffers support Python's `with` syntax to access the underlying `array`, with
+the gap removed. This is useful for doing regular expression searches over the
+buffer, since the `re` library can't easily search over custom classes.
 
 ```python
 from gapbuffer import gapbuffer
@@ -115,6 +117,7 @@ there, world!`.
 If we want to delete some text, we just expand the gap to consume it:
 
 ```
+hello there_, world!
 hello there__ world!
 hello there___world!
 hello there____orld!
@@ -131,13 +134,11 @@ When the content to be inserted is larger than the gap, the gap is expanded and
 the existing content is moved further down the buffer.
 
 The `gapbuffer` class handles this manipulation internally, so all a user has to
-do is use it like one would use the `array` module. Inserts and deletes that are
-near the same location should show near-linear behavior on the length of the
-inserted content, as long as the content doesn't exceed the average size of the
-gap.
+do is use it like one would use the `array` module. Inserts and deletes near the
+same location should show near-linear behavior on the length of the inserted
+content, as long as the content doesn't exceed the size of the gap, on average.
 
 Tests
 ----
 Tests can be run with `python test_gapbuffer.py`, and will use the `coverage`
-module if available to generate a HTML report. Currently, test code coverage is
-100%!
+module if available to generate a HTML report.
